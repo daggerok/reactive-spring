@@ -16,6 +16,8 @@ public class RxCfg {
     public CommandLineRunner runner() {
         return args -> reactor.rx.Streams
                 .from(asList("one, two, three".split(", ")))
+                .log()
+                .capacity(2)
                 .consume(out::println);
     }
 }
