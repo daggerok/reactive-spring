@@ -7,6 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import rx.Observable;
 
+import java.lang.reflect.Method;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -16,12 +17,25 @@ import static java.util.Arrays.asList;
 @Configuration
 @ComponentScan(basePackageClasses = ReactiveSpringApplication.class)
 public class RxCfg {
+
     @Bean
-    public CommandLineRunner runner() {
+    public CommandLineRunner funcsRx() {
+        return args -> Observable.from(Observable.class.getMethods())
+                .filter(m -> Observable.class.isAssignableFrom(m.getReturnType()))
+                .map(Method::getName)
+                .distinct()
+                .forEach(i -> out.printf("rx:%s\n", i));
+    }
+
+    @Bean
+    public CommandLineRunner rxRunner2() {
         Observable.just(IntStream.range(0, 3)
                 .mapToObj(String::valueOf)
                 .collect(Collectors.toSet()))
-                .take(2).subscribe(out::println);
+                .take(2)
+                .doOnRequest(aLong -> out.print(String.format("aLong: %s\n", aLong)))
+                .subscribe(out::println);
+
         return args -> reactor.rx.Streams
                 .from(asList("one, two, three".split(", ")))
                 .log()

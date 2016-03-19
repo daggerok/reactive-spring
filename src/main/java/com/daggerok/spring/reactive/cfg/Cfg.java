@@ -10,11 +10,24 @@ import reactor.core.composable.Deferred;
 import reactor.core.composable.Stream;
 import reactor.core.composable.spec.Streams;
 
+import java.lang.reflect.Method;
+
+import static java.lang.System.out;
+
 @Configuration
 @ComponentScan(basePackageClasses = ReactiveSpringApplication.class)
 public class Cfg {
     @Bean
-    public CommandLineRunner commandLineRunner() {
+    public CommandLineRunner funcsJava() {
+        return args1 -> java.util.stream.Stream.of(java.util.stream.Stream.class.getMethods())
+                .filter(m -> java.util.stream.Stream.class.isAssignableFrom(m.getReturnType()))
+                .map(Method::getName)
+                .distinct()
+                .forEach(i -> out.printf("java:%s\n", i));
+    }
+
+    @Bean
+    public CommandLineRunner runner2() {
         return args -> {
             Deferred<Object, Stream<Object>> stream = Streams.defer()
                     .env(new Environment())

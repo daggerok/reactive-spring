@@ -4,7 +4,7 @@ buildscript {
 		reactivestreamsVersion = '1.0.0'
 		projectreactorVersion = '1.1.6.RELEASE'
 		reactorVersion = '2.0.7.RELEASE'
-		lombokVersion = '1.16.8.0'
+		lombokVersion = '1.16.8'
 		rxJavaVersion = '1.0.10'
 		baseName = 'reactive-spring'
 		version = '1.0.0'
@@ -32,7 +32,7 @@ dependencies {
 			"org.reactivestreams:reactive-streams:$reactivestreamsVersion",
 			"org.reactivestreams:reactive-streams-tck:$reactivestreamsVersion",
 			'org.springframework.boot:spring-boot-starter-web',
-			"org.projectlombok:lombok-maven:$lombokVersion",
+			"org.projectlombok:lombok:$lombokVersion",
 			"io.reactivex:rxjava:$rxJavaVersion"
 
 	testCompile 'org.springframework.boot:spring-boot-starter-test'
