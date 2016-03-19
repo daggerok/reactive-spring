@@ -14,7 +14,7 @@ import reactor.core.composable.spec.Streams;
 @ComponentScan(basePackageClasses = ReactiveSpringApplication.class)
 public class Cfg {
     @Bean
-    public CommandLineRunner runner() {
+    public CommandLineRunner commandLineRunner() {
         return args -> {
             Deferred<Object, Stream<Object>> stream = Streams.defer()
                     .env(new Environment())

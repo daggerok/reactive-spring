@@ -2,7 +2,10 @@ buildscript {
 	ext {
 		springBootVersion = '1.3.3.RELEASE'
 		reactivestreamsVersion = '1.0.0'
+		projectreactorVersion = '1.1.6.RELEASE'
 		reactorVersion = '2.0.7.RELEASE'
+		lombokVersion = '1.16.8.0'
+		rxJavaVersion = '1.0.10'
 		baseName = 'reactive-spring'
 		version = '1.0.0'
 		gradleVersion = '2.11'
@@ -24,10 +27,13 @@ sourceCompatibility = targetCompatibility = 1.8
 repositories { jcenter() }
 
 dependencies {
-	compile 'org.projectreactor:reactor-core:1.1.6.RELEASE',
+	compile "io.projectreactor:reactor-stream:$reactorVersion",
+			"org.projectreactor:reactor-core:$projectreactorVersion",
 			"org.reactivestreams:reactive-streams:$reactivestreamsVersion",
 			"org.reactivestreams:reactive-streams-tck:$reactivestreamsVersion",
-			'org.springframework.boot:spring-boot-starter'
+			'org.springframework.boot:spring-boot-starter-web',
+			"org.projectlombok:lombok-maven:$lombokVersion",
+			"io.reactivex:rxjava:$rxJavaVersion"
 
 	testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
