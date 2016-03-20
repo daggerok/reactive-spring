@@ -8,7 +8,7 @@ buildscript {
 		rxJavaVersion = '1.0.10'
 		baseName = 'reactive-spring'
 		version = '1.0.0'
-		gradleVersion = '2.11'
+		gradleVersion = '2.12'
 	}
 
 	repositories { jcenter() }
