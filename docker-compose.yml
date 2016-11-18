@@ -1,0 +1,22 @@
+spring-boot-reactive-web-mongo:
+  container_name: spring-boot-reactive-web-mongo
+  image: mongo
+  environment:
+    - MONGO_PORT_27017_TCP_ADDR=localhost
+    - MONGO_PORT_27017_TCP_PORT=27017
+  ports:
+    - "27017:27017"
+
+# https://github.com/mongo-express/mongo-express-docker
+spring-boot-reactive-web-mongo-express:
+  container_name: spring-boot-reactive-web-mongo-express
+  image: mongo-express
+  ports:
+    - "8081:8081"
+  links:
+    - spring-boot-reactive-web-mongo
+  environment:
+    # should be a custom mongo container name:
+    ME_CONFIG_MONGODB_SERVER: spring-boot-reactive-web-mongo
+    ME_CONFIG_OPTIONS_EDITORTHEME: ambiance
+    ME_CONFIG_SITE_BASEURL: /
