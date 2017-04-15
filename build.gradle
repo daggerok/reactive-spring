@@ -8,13 +8,10 @@ plugins {
 
 version = '0.0.1'
 jar { baseName = 'reactive-spring' }
-
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-springBoot {
-  executable = true
-}
+springBoot { executable = true }
 
 repositories { jcenter() }
 
@@ -24,17 +21,15 @@ dependencies {
       'org.reactivestreams:reactive-streams',
       'org.reactivestreams:reactive-streams-tck:1.0.0',
       'org.springframework.boot:spring-boot-starter-web',
-      'org.projectlombok:lombok',
       'io.reactivex:rxjava:1.0.10'
-
+  compileOnly 'org.projectlombok:lombok'
+  runtime 'org.springframework.boot:spring-boot-devtools'
   testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
 
 dependencyManagement {
   imports {
     mavenBom 'org.springframework.boot:spring-boot-dependencies:1.5.2.RELEASE'
-// // important: comment this
-//    mavenBom 'org.springframework.cloud:spring-cloud-dependencies:Dalston.RC1'
   }
 }
 

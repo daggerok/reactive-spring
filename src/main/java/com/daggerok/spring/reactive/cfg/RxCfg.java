@@ -34,7 +34,7 @@ public class RxCfg {
                 .subscribe(out::println);
 
         return args -> reactor.rx.Streams
-                .from(asList("one, two, three".split(", ")))
+                .from(asList("one", "two", "three"))
                 .log()
                 .capacity(2)
                 .consume(out::println);
