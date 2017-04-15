@@ -11,8 +11,8 @@ jar { baseName = 'reactive-spring' }
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
+//bootRepackage { mainClass = 'com.daggerok.spring.reactive.ReactiveSpringApplication' }
 springBoot { executable = true }
-
 repositories { jcenter() }
 
 dependencies {
@@ -40,4 +40,4 @@ eclipse {
   }
 }
 
-task wrapper(type: Wrapper) { gradleVersion = '3.4' }
+task wrapper(type: Wrapper) { gradleVersion = '3.5' }
