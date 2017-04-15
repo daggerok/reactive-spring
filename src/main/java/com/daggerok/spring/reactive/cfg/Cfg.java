@@ -1,9 +1,7 @@
 package com.daggerok.spring.reactive.cfg;
 
-import com.daggerok.spring.reactive.ReactiveSpringApplication;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.Environment;
 import reactor.core.composable.Deferred;
@@ -15,7 +13,6 @@ import java.lang.reflect.Method;
 import static java.lang.System.out;
 
 @Configuration
-@ComponentScan(basePackageClasses = ReactiveSpringApplication.class)
 public class Cfg {
     @Bean
     public CommandLineRunner funcsJava() {
