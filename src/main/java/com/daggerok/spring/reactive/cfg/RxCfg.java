@@ -30,8 +30,8 @@ public class RxCfg {
     @Bean
     public CommandLineRunner rxRunner2() {
         Observable.just(IntStream.range(0, 3)
-                .mapToObj(String::valueOf)
-                .collect(Collectors.toSet()))
+                                .mapToObj(String::valueOf)
+                                .collect(Collectors.toSet()))
                 .take(2)
                 .doOnRequest(aLong -> out.print(String.format("aLong: %s\n", aLong)))
                 .subscribe(out::println);
