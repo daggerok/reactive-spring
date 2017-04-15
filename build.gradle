@@ -1,27 +1,42 @@
+buildscript {
+  ext {
+    springBootVersion = '2.0.0.BUILD-SNAPSHOT'
+  }
+  repositories {
+    mavenCentral()
+    maven { url "https://repo.spring.io/snapshot" }
+    maven { url "https://repo.spring.io/milestone" }
+  }
+  dependencies {
+    classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+  }
+}
+
 plugins {
   id 'java'
   id 'idea'
   id 'eclipse'
-  id 'org.springframework.boot' version '1.5.2.RELEASE'
-  id 'io.spring.dependency-management' version '1.0.2.RELEASE'
 }
+
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 version = '0.0.1'
 jar { baseName = 'reactive-spring' }
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
+//springBoot { executable = true }
 
-springBoot { executable = true }
-
-repositories { jcenter() }
+repositories {
+  mavenLocal()
+  jcenter()
+  mavenCentral()
+  maven { url "https://repo.spring.io/snapshot" }
+  maven { url "https://repo.spring.io/milestone" }
+}
 
 dependencies {
-  compile 'io.projectreactor:reactor-stream',
-      'org.projectreactor:reactor-core:1.1.6.RELEASE',
-      'org.reactivestreams:reactive-streams',
-      'org.reactivestreams:reactive-streams-tck:1.0.0',
-      'org.springframework.boot:spring-boot-starter-web',
-      'io.reactivex:rxjava:1.0.10'
+  compile 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'//,
   compileOnly 'org.projectlombok:lombok'
   runtime 'org.springframework.boot:spring-boot-devtools'
   testCompile 'org.springframework.boot:spring-boot-starter-test'
@@ -29,7 +44,7 @@ dependencies {
 
 dependencyManagement {
   imports {
-    mavenBom 'org.springframework.boot:spring-boot-dependencies:1.5.2.RELEASE'
+    mavenBom 'org.springframework.boot:spring-boot-dependencies:2.0.0.BUILD-SNAPSHOT'
   }
 }
 
@@ -40,4 +55,4 @@ eclipse {
   }
 }
 
-task wrapper(type: Wrapper) { gradleVersion = '3.4' }
+task wrapper(type: Wrapper) { gradleVersion = '3.5' }

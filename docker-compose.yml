@@ -1,0 +1,34 @@
+#rabbitmq:
+#  image: rabbitmq:3.6.9-management-alpine
+#  container_name: rabbitmq
+#  hostname: rabbitmq
+#  environment:
+#    RABBITMQ_DEFAULT_USER: guest
+#    RABBITMQ_DEFAULT_PASS: guest
+#  ports:
+#  - '5672:5672'
+#  - '8001:15672'
+#  - '25672:25672'
+#  volumes:
+#  - rabbitmq-data:/var/lib/rabbitmq
+mongodb:
+  container_name: mongodb # a custom mongo container_name
+  image: mongo:3.4.3
+  environment:
+    MONGO_PORT_27017_TCP_PORT: 27017
+  ports:
+    - "27017:27017"
+  volumes:
+    - mongodb-data:/data/db
+mongodb-express:
+  container_name: mongodb-express
+  image: mongo-express:0.38.0
+  ports:
+    - "8002:8081"
+  links:
+    - mongodb # a custom mongo container_name
+  environment:
+    # should be a custom mongo container name:
+    ME_CONFIG_MONGODB_SERVER: mongodb
+    ME_CONFIG_BASICAUTH_USERNAME: guest
+    ME_CONFIG_BASICAUTH_PASSWORD: guest

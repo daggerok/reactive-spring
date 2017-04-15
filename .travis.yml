@@ -1,6 +1,34 @@
+sudo: required
+services:
+  - docker
 language: java
 jdk: oraclejdk8
+env:
+  SPRING_PROFILES_ACTIVE: default
+  DOCKER_COMPOSE_VERSION: 1.12.0
+install: true
+before_install:
+  # gradle
+  - curl -s "https://get.sdkman.io" | bash
+  - source "$HOME/.sdkman/bin/sdkman-init.sh"
+  - sdk selfupdate
+  - touch "$HOME/.sdkman/etc/config"
+  - sed -i -e 's/^sdkman_auto_answer=false$/sdkman_auto_answer=true/g' "$HOME/.sdkman/etc/config"
+  - sdk use gradle
+  - sdk install gradle
+  - mkdir -p "$HOME/.sdkman/etc"
+  - sdk use gradle
+  - source "$HOME/.sdkman/bin/sdkman-init.sh"
+  # docker-compose
+  - export DOCKER_COPOSE_URL=https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)
+  - echo using\ $DOCKER_COPOSE_URL
+  - curl -L $DOCKER_COPOSE_URL > $PWD/docker-compose
+  - chmod +x $PWD/docker-compose
+  - sudo mv -f $PWD/docker-compose /usr/local/bin/
+before_script:
+  - docker-compose up -d
 script: gradle clean build bootRun
+after_script: docker-compose down -v
 cache:
   directories:
     - $HOME/.gradle/
