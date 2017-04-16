@@ -1,12 +1,12 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ReactiveRouterWebfluxApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+  <configuration default="false" name="ReactiveWebfluxServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
       <pattern>
-        <option name="PATTERN" value="daggerok.*" />
+        <option name="PATTERN" value="daggerok.reactive.service.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
-    <option name="SPRING_BOOT_MAIN_CLASS" value="daggerok.ReactiveRouterWebfluxApplication" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="daggerok.reactive.service.ReactiveWebfluxServiceApplication" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <module name="reactive-router-webflux" />
     <envs />

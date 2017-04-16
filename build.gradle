@@ -21,6 +21,10 @@ plugins {
 
 apply plugin: 'org.springframework.boot'
 
+bootJar {
+  mainClass = 'daggerok.reactive.service.ReactiveWebfluxServiceApplication.java'
+}
+
 version = '0.0.1'
 sourceCompatibility = JavaVersion.VERSION_1_8
 
