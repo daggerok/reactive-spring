@@ -1,8 +1,10 @@
-package daggerok.reactive.model;
+package daggerok.payload;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
+@Data
 @AllArgsConstructor(staticName = "of")
 public class Event {
-  public final String payload;
+  final String payload;
 }

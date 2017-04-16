@@ -1,6 +1,6 @@
-package daggerok.reactive;
+package daggerok.reactive.service.resource;
 
-import daggerok.reactive.model.Event;
+import daggerok.payload.Event;
 import lombok.val;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +32,7 @@ public class StreamingResource {
 
     val curr = Flux.fromStream(Stream.generate(() -> Event.of("" + System.currentTimeMillis())));
     val each = Flux.interval(Duration.ofMillis(2500));
+
     return Flux.zip(curr, each)
         .map(Tuple2::getT1);
   }
