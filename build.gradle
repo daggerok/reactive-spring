@@ -36,7 +36,8 @@ repositories {
 }
 
 dependencies {
-  compile 'org.springframework.boot:spring-boot-starter-webflux'
+  compile 'org.springframework.boot:spring-boot-starter-mustache'
+//  'org.springframework.boot:spring-boot-starter-webflux',
   compileOnly 'org.projectlombok:lombok'
   runtime 'org.springframework.boot:spring-boot-devtools'
   testCompile 'org.springframework.boot:spring-boot-starter-test'

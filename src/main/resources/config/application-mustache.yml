@@ -1,0 +1,5 @@
+spring:
+  mustache:
+    prefix: classpath:/static
+  mvc:
+    throw-exception-if-no-handler-found: false
