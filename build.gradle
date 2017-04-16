@@ -1,14 +1,13 @@
 buildscript {
-  ext {
-    springBootVersion = '2.0.0.BUILD-SNAPSHOT'
-  }
   repositories {
+    mavenLocal()
+    jcenter()
     mavenCentral()
     maven { url "https://repo.spring.io/snapshot" }
     maven { url "https://repo.spring.io/milestone" }
   }
   dependencies {
-    classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.0.0.BUILD-SNAPSHOT'
   }
 }
 
@@ -29,14 +28,16 @@ version = '0.0.1'
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
+//  mavenLocal()
+  jcenter()
   mavenCentral()
   maven { url 'https://repo.spring.io/snapshot' }
   maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
-  compile('org.springframework.boot:spring-boot-starter-webflux')
-  compileOnly('org.projectlombok:lombok')
-  runtime('org.springframework.boot:spring-boot-devtools')
-  testCompile('org.springframework.boot:spring-boot-starter-test')
+  compile 'org.springframework.boot:spring-boot-starter-webflux'
+  compileOnly 'org.projectlombok:lombok'
+  runtime 'org.springframework.boot:spring-boot-devtools'
+  testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
