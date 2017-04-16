@@ -1,0 +1,21 @@
+sudo: required
+language: java
+jdk: oraclejdk8
+install: true
+before_install:
+  # gradle
+  - curl -s "https://get.sdkman.io" | bash
+  - source "$HOME/.sdkman/bin/sdkman-init.sh"
+  - sdk selfupdate
+  - touch "$HOME/.sdkman/etc/config"
+  - sed -i -e 's/^sdkman_auto_answer=false$/sdkman_auto_answer=true/g' "$HOME/.sdkman/etc/config"
+  - sdk use gradle
+  - sdk install gradle
+  - mkdir -p "$HOME/.sdkman/etc"
+  - sdk use gradle
+  - source "$HOME/.sdkman/bin/sdkman-init.sh"
+script: gradle clean build
+cache:
+  directories:
+    - $HOME/.gradle/
+    - .gradle/
