@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.stream.Stream;
 
+import static java.util.Objects.nonNull;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -103,8 +104,6 @@ public class SpringBeansApplication {
     server
         .newHandler(reactorAdapter)
         .block();
-    // press enter to shutdown
-    System.in.read();
   }
 
   @PreDestroy
@@ -114,8 +113,10 @@ public class SpringBeansApplication {
 
   public static void main(String[] args) {
 
+    String port = nonNull(args) && args.length > 0 ? args[0] : "8888";
+
     new SpringApplicationBuilder(SpringBeansApplication.class)
-        .properties(Collections.singletonMap("server.port", "8888"))
+        .properties(Collections.singletonMap("server.port", port))
         .run(args);
   }
 }

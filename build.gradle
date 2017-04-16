@@ -1,14 +1,12 @@
+///*
 buildscript {
-  ext {
-    springBootVersion = '2.0.0.BUILD-SNAPSHOT'
-  }
   repositories {
     mavenCentral()
-    maven { url "https://repo.spring.io/snapshot" }
-    maven { url "https://repo.spring.io/milestone" }
+    maven { url 'https://repo.spring.io/snapshot' }
+    maven { url 'https://repo.spring.io/milestone' }
   }
   dependencies {
-    classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.0.0.BUILD-SNAPSHOT'
   }
 }
 
@@ -16,13 +14,45 @@ plugins {
   id 'java'
   id 'idea'
   id 'eclipse'
+  id 'application'
+  id 'cn.bestwu.propdeps' version '0.0.10'
+  id 'cn.bestwu.propdeps-idea' version '0.0.10'
+  id 'cn.bestwu.propdeps-maven' version '0.0.10'
+  id 'cn.bestwu.propdeps-eclipse' version '0.0.10'
   id 'io.spring.dependency-management' version '1.0.2.RELEASE'
 }
 
 apply plugin: 'org.springframework.boot'
 
+mainClassName = 'daggerok.Application'
+
 bootJar {
-  mainClass = 'daggerok.reactive.service.ReactiveWebfluxServiceApplication.java'
+  launchScript {
+    included = true
+  }
+  mainClass = "$mainClassName"
+}
+
+build.dependsOn bootJar
+//*/
+
+/*
+plugins {
+  id 'java'
+  id 'idea'
+  id 'eclipse'
+  id 'cn.bestwu.propdeps' version '0.0.10'
+  id 'cn.bestwu.propdeps-idea' version '0.0.10'
+  id 'cn.bestwu.propdeps-maven' version '0.0.10'
+  id 'cn.bestwu.propdeps-eclipse' version '0.0.10'
+  id 'io.spring.dependency-management' version '1.0.2.RELEASE'
+}
+*/
+
+dependencyManagement {
+  imports {
+    mavenBom 'org.springframework.boot:spring-boot-dependencies:2.0.0.BUILD-SNAPSHOT'
+  }
 }
 
 version = '0.0.1'
@@ -35,8 +65,20 @@ repositories {
 }
 
 dependencies {
-  compile('org.springframework.boot:spring-boot-starter-webflux')
-  compileOnly('org.projectlombok:lombok')
-  runtime('org.springframework.boot:spring-boot-devtools')
-  testCompile('org.springframework.boot:spring-boot-starter-test')
+  compile 'org.springframework.boot:spring-boot-starter-webflux'//,
+//          'org.springframework.boot:spring-boot-starter-aop',
+//          'org.springframework.boot:spring-boot-starter-data-mongodb',
+//          'org.mongodb:mongodb-driver-reactivestreams',
+//          'org.springframework.boot:spring-boot-starter-websocket',
+//          'org.webjars:webjars-locator',
+//          'org.webjars:jquery:3.2.0',
+//          'org.webjars:materializecss:0.98.1',
+//          'org.webjars:react:15+',
+//          'org.webjars:babel:5.8.29-1',
+//          'org.webjars.npm:types__whatwg-fetch:0.0.33', // fetch api
+//          'org.webjars.bower:event-source-polyfill:0.0.4' // sse api
+  optional 'org.springframework.boot:spring-boot-configuration-processor'
+  compileOnly 'org.projectlombok:lombok'
+  runtime 'org.springframework.boot:spring-boot-devtools'
+  testCompile 'org.springframework.boot:spring-boot-starter-test'
 }

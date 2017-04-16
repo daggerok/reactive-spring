@@ -12,6 +12,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.Collections;
 import java.util.function.Consumer;
 
+import static java.util.Objects.nonNull;
+
 @Slf4j
 @SpringBootApplication
 public class WebClientApplication {
@@ -41,8 +43,10 @@ public class WebClientApplication {
 
   public static void main(String[] args) {
 
+    String port = nonNull(args) && args.length > 0 ? args[0] : "3000";
+
     new SpringApplicationBuilder(WebClientApplication.class)
-        .properties(Collections.singletonMap("server.port", "3000"))
+        .properties(Collections.singletonMap("server.port", port))
         .run(args);
   }
 }

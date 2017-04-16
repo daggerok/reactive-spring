@@ -13,12 +13,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = {
+        Application.class,
         ReactiveWebfluxServiceApplication.class,
         WebClientApplication.class,
         RoutesApplication.class,
         SpringBeansApplication.class,
     })
-public class ReactiveWebfluxServiceApplicationTests {
+public class ReactiveApplicationTests {
 
   @Test
   public void contextLoads() {}

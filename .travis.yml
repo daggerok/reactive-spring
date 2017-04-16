@@ -1,7 +1,9 @@
-sudo: required
+group: edge
+install: true
 language: java
 jdk: oraclejdk8
-install: true
+env:
+  SPRING_PROFILES_ACTIVE: dev
 before_install:
   # gradle
   - curl -s "https://get.sdkman.io" | bash
@@ -14,7 +16,10 @@ before_install:
   - mkdir -p "$HOME/.sdkman/etc"
   - sdk use gradle
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
-script: gradle clean build
+script:
+  - gradle clean build
+after_script:
+  - gradle --stop
 cache:
   directories:
     - $HOME/.gradle/

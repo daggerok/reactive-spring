@@ -1,6 +1,22 @@
 reactive-spring [![build](https://travis-ci.org/daggerok/reactive-spring.svg?branch=master)](https://travis-ci.org/daggerok/reactive-spring)
 ===============
 
+```bash
+gradle bootRun
+
+# or customize timeout (default is 5 seconds)
+gradle clean build
+bash build/libs/*.jar -Dargs=300
+java -jar build/libs/*.jar -Dargs=30
+porrts are allocated:
+5
+# cleanup
+export listen="$(netstat -AaLlnW|grep -E '3000|8000|8080|8888|9999' | wc -l)"
+if [ "$listen" -ne "0" ]; then echo "seems like java is allocating $listen ports"; fi;
+
+killall -9 java
+```
+
 links:
 - [project page](http://projects.spring.io/spring-framework/)
 - [webflux sse](https://spring.io/blog/2017/03/08/spring-tips-server-sent-events-sse)
