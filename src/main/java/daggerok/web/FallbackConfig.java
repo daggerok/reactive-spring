@@ -1,4 +1,4 @@
-package daggerok.config;
+package daggerok.web;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
