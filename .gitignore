@@ -1,6 +1,8 @@
 ### IntelliJ IDEA ###
 .idea/
 !.idea/runConfigurations/*
+!idea/compiler.xml
+!idea/externalDependencies.xml
 .gradle/
 build/
 gradle*

@@ -7,4 +7,5 @@ links:
 
 ```bash
 gradle bootRun
+open http://localhost:3000
 ```
