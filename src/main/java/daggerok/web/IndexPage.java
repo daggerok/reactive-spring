@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class IndexPage {
 
-  @GetMapping({"", "/", "/default-fallback"})
-  public String index() {
+  @GetMapping({ "", "/" })
+  String index() {
     return "/index.html";
   }
 }

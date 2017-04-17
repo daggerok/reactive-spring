@@ -1,34 +1,30 @@
 package daggerok.chat;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.springframework.web.bind.annotation.*;
+import org.apache.catalina.connector.ClientAbortException;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1")
+@RequiredArgsConstructor
 public class MessageCommandResource {
 
-  List<SseEmitter> sseEmitters = new CopyOnWriteArrayList<>();
+  @Qualifier("chatSubscribersContainer")
+  final List<SseEmitter> chatSubscribersContainer;
 
-  @GetMapping("/chat-messages")
-  SseEmitter sseEmitter() {
-    val emitter = new SseEmitter();
+  @PostMapping("/api/v1/command/send-message")
+  void postMessage(@RequestBody Message message) {
 
-    sseEmitters.add(emitter);
-    emitter.onCompletion(() -> sseEmitters.remove(emitter));
-    return emitter;
-  }
-
-  @PostMapping("/send-message")
-  void postMessage(@RequestBody String message) {
-
-    sseEmitters.forEach(emitter -> {
+    chatSubscribersContainer.forEach(emitter -> {
       try {
 
         emitter.send(SseEmitter
@@ -38,8 +34,16 @@ public class MessageCommandResource {
 
       } catch (IOException e) {
 
-        log.error("emitter caused {} error {} and will be removed..",
-                  e.getClass().getSimpleName(), e.getMessage());
+        val type = e.getClass();
+
+        if (type.equals(ClientAbortException.class)) {
+
+          log.info("cleaning dead client emitter: {}: {}", type.getSimpleName(), e.getMessage());
+
+        } else {
+
+          log.error("caused error: {}", e.getMessage(), e);
+        }
       }
     });
   }

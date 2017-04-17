@@ -1,57 +1,164 @@
+const {
+  func,
+  string,
+  bool,
+  arrayOf,
+  object,
+  element,
+} = React.PropTypes;
+
+/** owner view */
+const Name = ({ setUsername }) => {
+  let inputRef;
+  return <input type="text"
+                onKeyDown={setUsername}
+                onChange={input => inputRef = input}
+                placeholder="please, enter you name"/>;
+};
+
+Name.propTypes = {
+  setUsername: func.isRequired,
+};
+
+/** header view */
+const Header = ({ owner }) => <div>
+  <div className="card-title">
+    <h5 className="blue-grey-text">hello {owner}!</h5>
+  </div>
+</div>;
+
+Header.propTypes = {
+  owner: string.isRequired,
+};
+
+/** rest client helper */
+const onInput = (owner = "anonymous", { keyCode, target }) => {
+  const { value } = target;
+  if (keyCode !== 13 || value.trim().length === 0) return;
+  fetch("/api/v1/command/send-message", {
+    method: "post",
+    headers: { "content-type": "application/json; charset=UTF-8" },
+    body: JSON.stringify({
+      owner,
+      body: value,
+    }),
+  });
+  target.value = "";
+};
+
+/** message sender view */
+const MessageSender = ({ owner }) => {
+  let inputRef;
+  return <input type="text"
+                placeholder="enter message"
+                ref={input => inputRef = input}
+                onKeyDown={e => onInput(owner, e)}/>;
+};
+
+MessageSender.propTypes = {
+  owner: string.isRequired,
+};
+
+/** messages list view */
+const Messages = ({ messages }) => <ul>
+  {
+    ! messages
+      ? <li>Loading...</li>
+      : messages.map((message, id) => <li key={id}>{message.owner}: {message.body}</li>)
+  }
+</ul>;
+
+Messages.propTypes = {
+  messages: arrayOf(object).isRequired,
+};
+
+/** main chat application (smart) component */
 class Chat extends React.Component {
-  constructor() {
-    super();
-    this.state = { messages: [] };
-    this.onInput = this.onInput.bind(this);
+  constructor(props) {
+    super(props);
+    this.state = {
+      edit: props.edit,
+      owner: "",
+      messages: props.messages,
+    };
+    this.toggleEdit = this.toggleEdit.bind(this);
+    this.setUsername = this.setUsername.bind(this);
   }
   componentDidMount() {
-    this.source = new EventSource("/api/v1/chat-messages");
+    this.source = new EventSource("/api/v1/query/subscribe/chat-messages");
     this.source.addEventListener("chat-message-event", ({ data }) => {
-      const { message } = JSON.parse(data);
-      this.setState({ messages: [message, ...this.state.messages] });
+      const { owner, body } = JSON.parse(data);
+      this.setState({
+        messages: [
+          { owner, body },
+          ...this.state.messages,
+        ],
+      });
     });
   }
-  onInput({keyCode, target}) {
-    if (keyCode === 13) {
-      fetch("/api/v1/send-message", {
-        method: "post",
-        headers: {
-          "content-type": "application/json; charset=UTF-8"
-        },
-        body: JSON.stringify({ message: target.value }),
-      });
-      target.value = "";
-    }
+  toggleEdit() {
+    this.setState({
+      edit: !this.state.edit,
+    });
+  }
+  setUsername({ keyCode, target }) {
+    const { value } = target;
+    if (keyCode !== 13 || value.trim().length === 0) return;
+    this.setState({
+      edit: false,
+      owner: value,
+    });
+    target.value = "";
   }
   render() {
-    const { messages } = this.state;
+    const { edit, owner, messages } = this.state;
     return (
       <div className="container">
-        <h3 className="header-panel">{this.props.name || 'chat app'}</h3>
-        <div className="card-title">
-          <h5>hello anonymous!</h5>
-        </div>
-        <input placeholder="enter message"
-               onKeyDown={e => this.onInput(e)}
-               ref={input => this.inputRef = input}/>
-        <ul>
-          {
-            messages
-            && messages.map((message, index) =>
-              <li key={index}>{message}</li>)
-          }
-        </ul>
+        {
+          edit
+            ? <Name setUsername={this.setUsername}/>
+            : <div>
+                <Header owner={owner}/>
+                <MessageSender owner={owner}/>
+                <Messages messages={messages}/>
+              </div>
+        }
       </div>
     );
   }
 }
 
-const Nav = props => <nav className="light-blue lighten-3">
+Chat.propTypes = {
+  edit: bool.isRequired,
+  messages: arrayOf(object).isRequired,
+};
+
+Chat.defaultProps = {
+  edit: true,
+  messages: [
+    {
+      owner: "system",
+      body: "We salute you!"
+    }
+  ],
+};
+
+/** Nav (reusable navbar) */
+const Nav = ({ appName }) => <nav className="light-blue lighten-3">
   <div className="navbar-wrapper container">
-    <div className="brand-logo center">Chat</div>
+    <div className="brand-logo center">{appName}</div>
   </div>
 </nav>;
 
+Nav.propTypes = {
+  appName: string,
+};
+
+Nav.defaultProps = {
+  appName: "SSE Chat",
+};
+
+/** Apps (parent container component) */
 const Apps = props => <div>
   <Nav/>
   <div>
@@ -59,24 +166,41 @@ const Apps = props => <div>
       !props || !props.children
         ? <div>Loading... (required at least one child)</div>
         : !props.children.length
-            ? <props.children.type {...props.children.props} single={true} {...props}>{props.children}</props.children.type>
+            ? <props.children.type single={true}
+                                   {...props.children.props}
+                                   {...props}>{props.children}</props.children.type>
             : props.children.map((child, key) =>
-              React.cloneElement(child, {...props, key, single: false}))
+                React.cloneElement(child, {...props, key, single: false}))
     }
   </div>
 </div>;
 
+Apps.propTypes = {
+  // // require only single child:
+  // children: element.isRequired,
+  // required 2 or more Components as a children:
+  children: arrayOf(object).isRequired,
+};
+
+Apps.defaultProps = {
+  children: [
+    <Chat/>,
+    <Chat/>,
+  ],
+};
+
+/** bootstrap app */
+ReactDOM.render(
+  <Apps/>,
+  document.getElementById("app")
+);
+
+/*
 ReactDOM.render(
   <Apps>
+    <Chat/>
     <Chat/>
   </Apps>,
   document.getElementById("app")
 );
-
-// ReactDOM.render(
-//   <Apps>
-//     <Chat/>
-//     <Chat name="yet another chat"/>
-//   </Apps>,
-//   document.getElementById("app")
-// );
+*/

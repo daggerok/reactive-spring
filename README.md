@@ -7,5 +7,6 @@ links:
 
 ```bash
 gradle bootRun
-open http://localhost:3000
+open http://localhost:3000 $ browser 1
+open http://localhost:3000 $ browser 2
 ```
