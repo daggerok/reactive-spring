@@ -182,11 +182,34 @@ Apps.propTypes = {
   children: arrayOf(object).isRequired,
 };
 
+/** returns value that is greater than zero */
+const positive = value => !!value && value > 0 ? value : 1;
+
+/**
+ * parse query param from url
+ * example: `getParam('q')`
+ * returns 3 for http://localhost:3000/?q=3&y=2
+ */
+const getParam = (param = 'q', value = 1) => {
+  // const url = window.location.href,
+  const uri = window.location.search,
+    name = param.replace(/[\[\]]/g, "\\$&"),
+    regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
+    results = regex.exec(uri); // = regex.exec(url);
+  if (!results || !results.length || !results[2]) return positive(value);
+  const resultStr = decodeURIComponent(results[2].replace(/\+/g, " "));
+  return positive(+resultStr);
+};
+
+/**
+ *  generate array of elements with size
+ *  example: `generateArray(<div>hi!</div>)
+ */
+const generateArray = (element = <Chat/>, size = getParam()) =>
+  [...new Array(size)].map(_ => element);
+
 Apps.defaultProps = {
-  children: [
-    <Chat/>,
-    <Chat/>,
-  ],
+  children: generateArray(),
 };
 
 /** bootstrap app */
@@ -194,13 +217,3 @@ ReactDOM.render(
   <Apps/>,
   document.getElementById("app")
 );
-
-/*
-ReactDOM.render(
-  <Apps>
-    <Chat/>
-    <Chat/>
-  </Apps>,
-  document.getElementById("app")
-);
-*/

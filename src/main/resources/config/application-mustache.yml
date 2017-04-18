@@ -1,3 +1,6 @@
 spring:
   mustache:
     prefix: classpath:/static
+  mvc:
+    async:
+      request-timeout: -1
