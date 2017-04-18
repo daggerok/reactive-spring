@@ -38,7 +38,8 @@ dependencies {
       'org.webjars:jquery:3.2.0',
       'org.webjars:materializecss:0.98.1',
       'org.webjars:react:15+',
-      'org.webjars:babel:5.8.29-1'
+      'org.webjars:babel:5.8.29-1',
+      'org.webjars.npm:types__whatwg-fetch:0.0.33' // fetch api
 
   compileOnly 'org.projectlombok:lombok'
   runtime 'org.springframework.boot:spring-boot-devtools'

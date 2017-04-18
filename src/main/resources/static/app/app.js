@@ -187,10 +187,10 @@ const positive = value => !!value && value > 0 ? value : 1;
 
 /**
  * parse query param from url
- * example: `getParam('q')`
+ * example: `getParam("q")`
  * returns 3 for http://localhost:3000/?q=3&y=2
  */
-const getParam = (param = 'q', value = 1) => {
+const getParam = (param = "q", value = 1) => {
   // const url = window.location.href,
   const uri = window.location.search,
     name = param.replace(/[\[\]]/g, "\\$&"),
