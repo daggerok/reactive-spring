@@ -44,6 +44,7 @@ const onInput = (owner = "anonymous", { keyCode, target }) => {
     }),
   });
   target.value = "";
+  target.focus();
 };
 
 /** message sender view */
@@ -77,15 +78,17 @@ class Chat extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      edit: props.edit,
       owner: "",
+      edit: props.edit,
       messages: props.messages,
     };
     this.toggleEdit = this.toggleEdit.bind(this);
     this.setUsername = this.setUsername.bind(this);
   }
-  componentDidMount() {
-    this.source = new EventSource("/api/v1/query/subscribe/chat-messages");
+  connect() {
+    return this.source = new EventSource("/api/v1/query/subscribe/chat-messages");
+  }
+  subscribe() {
     this.source.addEventListener("chat-message-event", ({ data }) => {
       const { owner, body } = JSON.parse(data);
       this.setState({
@@ -95,6 +98,13 @@ class Chat extends React.Component {
         ],
       });
     });
+    this.source.addEventListener("error", e => console.error("sse error", e));
+    this.source.addEventListener("open", e => console.log("subscribed on", e.target.url));
+  }
+  disconnect() {
+    if (this.source) {
+      source.close();
+    }
   }
   toggleEdit() {
     this.setState({
@@ -109,6 +119,13 @@ class Chat extends React.Component {
       owner: value,
     });
     target.value = "";
+  }
+  componentDidMount() {
+    this.connect();
+    this.subscribe();
+  }
+  componentWillUnmount () {
+    this.disconnect();
   }
   render() {
     const { edit, owner, messages } = this.state;
