@@ -18,28 +18,14 @@ plugins {
 
 apply plugin: 'org.springframework.boot'
 
-//def entry = 'daggerok.SseApplication'
-//
-//bootJar {
-//  launchScript {
-//    included = true
-//  }
-//  manifest { attributes 'Main-Class': "$entry" }
-//  mainClass = "$entry"
-//}
-//
-//bootRun {
-//  main = 'daggerok.SseApplication'
-//}
-//
-//bootJar {
-//  manifest {
-//    attributes 'Main-Class': 'daggerok.SseApplication'
-//  }
-//  launchScript {
-//    included = true
-//  }
-//}
+bootJar {
+  launchScript {
+    included = true
+  }
+  mainClass = 'daggerok.SseApplication'
+}
+
+build.dependsOn bootJar
 
 version = '0.0.1'
 sourceCompatibility = JavaVersion.VERSION_1_8
