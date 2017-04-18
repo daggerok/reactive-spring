@@ -1,3 +1,1 @@
-spring:
-  mustache:
-    prefix: classpath:/static
+spring.mustache.prefix: classpath:/static
