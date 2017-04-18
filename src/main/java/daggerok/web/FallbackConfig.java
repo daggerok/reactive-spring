@@ -28,6 +28,6 @@ public class FallbackConfig implements ErrorViewResolver {
 
     log.info("{{}}", formatted);
 
-    return new ModelAndView("/index.html");
+    return new ModelAndView("/react.html");
   }
 }

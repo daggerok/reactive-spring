@@ -18,9 +18,28 @@ plugins {
 
 apply plugin: 'org.springframework.boot'
 
-bootJar {
-  mainClass = 'daggerok.reactive.service.ReactiveWebfluxServiceApplication.java'
-}
+//def entry = 'daggerok.SseApplication'
+//
+//bootJar {
+//  launchScript {
+//    included = true
+//  }
+//  manifest { attributes 'Main-Class': "$entry" }
+//  mainClass = "$entry"
+//}
+//
+//bootRun {
+//  main = 'daggerok.SseApplication'
+//}
+//
+//bootJar {
+//  manifest {
+//    attributes 'Main-Class': 'daggerok.SseApplication'
+//  }
+//  launchScript {
+//    included = true
+//  }
+//}
 
 version = '0.0.1'
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -35,6 +54,9 @@ dependencies {
   compile 'org.springframework.boot:spring-boot-starter-mustache',
       'org.springframework.boot:spring-boot-starter-websocket',
       'org.webjars:webjars-locator',
+      'org.webjars:sockjs-client:1.1.2',
+      //'org.webjars:sockjs-client:0.3.4',
+      'org.webjars:stomp-websocket:2.3.3-1',
       'org.webjars:jquery:3.2.0',
       'org.webjars:materializecss:0.98.1',
       'org.webjars:react:15+',
