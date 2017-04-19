@@ -1,4 +1,4 @@
-package daggerok.web;
+package daggerok.chat.web;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -28,6 +28,6 @@ public class FallbackConfig implements ErrorViewResolver {
 
     log.info("{{}}", formatted);
 
-    return new ModelAndView("/react.html");
+    return new ModelAndView("/index.html");
   }
 }

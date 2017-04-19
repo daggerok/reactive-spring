@@ -1,0 +1,373 @@
+= cloud-native-rabbitmq-stomp-broker image:https://travis-ci.org/daggerok/reactive-spring.svg?branch=cloud-native-rabbitmq-stomp-broker["Build Status", link="https://travis-ci.org/daggerok/reactive-spring"]
+
+stack:
+
+- Docker cluster
+- RabbitMQ stomp broker relay (for production applications)
+- STOMP / SockJS chat on spring-boot backend and react frontend
+
+== docker (swarm) cluster):
+
+=== prepare:
+
+==== link:https://github.com/daggerok/docker-machine-linux-fish-shell[install docker-machine]
+
+==== build rabbitmq-stomp image (broker)
+
+[bash]
+----
+docker rm -f daggerok/rabbitmq-stomp | true
+docker build --rm --force-rm -t daggerok/rabbitmq-stomp . -f src/main/docker/rabbitmq-stomp/Dockerfile
+----
+
+==== build application
+
+[bash]
+----
+gradle clean bootJar
+docker rm -f daggerok/chat | true
+docker build --rm --force-rm -t daggerok/chat . -f src/main/docker/app/Dockerfile
+----
+
+==== authenticate into registry
+
+[bash]
+----
+docker login
+----
+
+==== push stomp broker
+
+[bash]
+----
+docker tag daggerok/rabbitmq-stomp daggerok/rabbitmq-stomp:0.0.1
+docker push daggerok/rabbitmq-stomp
+...
+0.0.1: digest: sha256:1a58cd9eee95a62418892ff8e2c2930a329ea87dd697b565f16c9f4b053c5489 size: 2610
+...
+latest: digest: sha256:1a58cd9eee95a62418892ff8e2c2930a329ea87dd697b565f16c9f4b053c5489 size: 2610
+...
+----
+
+==== push chat application
+
+[bash]
+----
+docker tag daggerok/chat daggerok/chat:0.0.1
+docker push daggerok/chat
+...
+0.0.1: digest: sha256:a4b0add5746e5759c55c6d76dc6276bdfc02608a4eb166b22946ad8ca0cb7842 size: 1374
+...
+latest: digest: sha256:a4b0add5746e5759c55c6d76dc6276bdfc02608a4eb166b22946ad8ca0cb7842 size: 1374
+....
+----
+
+=== putting all things together
+
+==== create nodes for docker cluster
+
+in first terminal:
+
+[fish,bash]
+----
+# fish:
+for i in 0 1 2 3 4 5; docker-machine create "node$i"; end;
+
+# bash:
+for i in 0 1 2 3 4 5; do docker-machine create "node$i"; done;
+
+# done:
+docker-machine ls
+NAME    ACTIVE   DRIVER       STATE     URL                         SWARM   DOCKER        ERRORS
+node0   -        virtualbox   Running   tcp://192.168.99.100:2376           v17.04.0-ce
+node1   -        virtualbox   Running   tcp://192.168.99.101:2376           v17.04.0-ce
+node2   -        virtualbox   Running   tcp://192.168.99.102:2376           v17.04.0-ce
+node3   -        virtualbox   Running   tcp://192.168.99.103:2376           v17.04.0-ce
+node4   -        virtualbox   Running   tcp://192.168.99.104:2376           v17.04.0-ce
+node5   -        virtualbox   Running   tcp://192.168.99.105:2376           v17.04.0-ce
+----
+
+==== init swarm cluster
+
+[bash]
+----
+docker-machine ssh node0
+
+docker@node0:~$ export ip=$(ifconfig eth1 | grep 'inet ' | awk '{print $2}' | awk -F ':' '{print $2}')
+
+docker@node0:~$ echo $ip # 192.168.99.100
+
+docker@node0:~$ docker swarm init --advertise-addr $ip
+Swarm initialized: current node (k8iztytsgpi386w8qnctiupma) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join \
+    --token SWMTKN-1-1d8ztxa21b0p8fh4vrrcjwgfcunzazbtbgil5n30ckigmn32n5-evb3oovmoirnsxu585xu2lijn \
+    192.168.99.100:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+----
+
+==== create manager join-token
+
+[bash]
+----
+docker@node0:~$ docker swarm join-token manager
+    docker swarm join \
+    --token SWMTKN-1-1d8ztxa21b0p8fh4vrrcjwgfcunzazbtbgil5n30ckigmn32n5-0of04z08hqpmngty1dbtyx0sd \
+    192.168.99.100:2377
+----
+
+==== join managers (node1, node2)
+
+in second terminal:
+
+[bash]
+----
+docker-machine ssh node1 # do same for node2
+
+docker@node1:~$ docker swarm join \
+    --token SWMTKN-1-1d8ztxa21b0p8fh4vrrcjwgfcunzazbtbgil5n30ckigmn32n5-0of04z08hqpmngty1dbtyx0sd \
+    192.168.99.100:2377
+This node joined a swarm as a manager.
+
+docker@node1:~$ exit
+----
+
+==== join workers (node3, node4, node5)
+
+[bash]
+----
+docker-machine ssh node3 # do same for node4 and node5
+
+docker@node3:~$ docker swarm join \
+    --token SWMTKN-1-1d8ztxa21b0p8fh4vrrcjwgfcunzazbtbgil5n30ckigmn32n5-evb3oovmoirnsxu585xu2lijn \
+    192.168.99.100:2377
+This node joined a swarm as a worker.
+
+docker@node3:~$ exit
+----
+
+==== create overlay network
+
+[bash]
+----
+# in first terminal
+docker@node0:~$ docker network create --driver overlay chat-network
+oci5bgtn99isa8d584gaqbcsb
+
+docker@node0:~$ docker network ls| grep chat
+oci5bgtn99is        chat-network        overlay             swarm
+----
+
+==== cluster overview
+
+[bash]
+----
+docker@node0:~$ docker node ls
+ID                           HOSTNAME  STATUS  AVAILABILITY  MANAGER STATUS
+7ogdn1deyhpbr1557wbxrfvwl    node1     Ready   Active        Reachable
+k8iztytsgpi386w8qnctiupma *  node0     Ready   Active        Leader
+l8mygm8pkvrde831edqz55oso    node2     Ready   Active        Reachable
+o32yl1d0rhk9hr1ydix2rrl7i    node3     Ready   Active
+pg9v129520sf33t739lben6jt    node5     Ready   Active
+rwxb6sma13tj0bqgiaa56gcqz    node4     Ready   Active
+----
+
+=== time to deploy our services
+
+==== deploy global rabbitmq-stomp service
+
+[bash]
+----
+ocker@node0:~$ docker service create \
+  -p 61613:61613 \
+  -p 15672:15672 \
+  --name rabbitmq-stomp \
+  --network chat-network \
+  -e RABBITMQ_DEFAULT_USER=infrastructureLogin \
+  -e RABBITMQ_DEFAULT_PASS=infrastructurePasscode \
+  daggerok/rabbitmq-stomp:0.0.1
+n58w7zw2ps52ncbht3p6irtr7
+
+docker@node0:~$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+docker@node0:~$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE
+n58w7zw2ps52        rabbitmq-stomp      replicated          1/1                 daggerok/rabbitmq-stomp:0.0.1
+----
+
+now every services will have access to rabbitmq locally using hostname rabbitmq-stomp no
+matter if it's on same host or not. it's possible because of docker swarm reverse proxy.
+there is another mode (global) - it's common use case in cloud native applications...
+
+==== finally we can deploy our app
+
+[bash]
+----
+docker@node0:~$ docker service create \
+  -p 80:8080 \
+  --name chat \
+  --network chat-network \
+  -e STOMP_BROKER_RELAY_HOST=rabbitmq-stomp \
+  -e STOMP_BROKER_RELAY_USER=infrastructureLogin \
+  -e STOMP_BROKER_RELAY_PASS=infrastructurePasscode \
+  daggerok/chat:0.0.1
+0kccls06n04xv0zop44ultjoy
+docker@node0:~$ docker service ls
+
+# verify services
+docker@node0:~$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE
+0kccls06n04x        chat                replicated          0/1                 daggerok/chat:0.0.1
+n58w7zw2ps52        rabbitmq-stomp      replicated          1/1                 daggerok/rabbitmq-stomp:0.0.1
+
+# okay, we have to wait until serivces will be pulled
+# ...after fiew momentsof waiting let's try again:
+docker@node0:~$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE
+0kccls06n04x        chat                replicated          1/1                 daggerok/chat:0.0.1
+n58w7zw2ps52        rabbitmq-stomp      replicated          1/1                 daggerok/rabbitmq-stomp:0.0.1
+
+docker@node0:~$ docker service ps chat
+ID                  NAME                IMAGE                 NODE                DESIRED STATE       CURRENT STATE           ERROR               PORTS
+92qu0n37nbn5        chat.1              daggerok/chat:0.0.1   node1               Running             Running 3 minutes ago
+----
+
+now we have single service running on node1:
+
+==== testing application
+
+go to http://node1
+verify chat is working
+
+==== let's assume our chat became very popular, so we need scale it out (horizontally)
+
+let's scale out up to 5
+
+[bash]
+----
+docker service scale chat=5
+chat scaled to 5
+
+docker@node0:~$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE
+0kccls06n04x        chat                replicated          4/5                 daggerok/chat:0.0.1
+n58w7zw2ps52        rabbitmq-stomp      replicated          1/1                 daggerok/rabbitmq-stomp:0.0.1
+
+docker@node0:~$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE
+0kccls06n04x        chat                replicated          5/5                 daggerok/chat:0.0.1
+n58w7zw2ps52        rabbitmq-stomp      replicated          1/1                 daggerok/rabbitmq-stomp:0.0.1
+----
+
+easy..
+
+===== testing docker reverse proxy
+
+we have 6 nodes and 5 instances of chat application running
+let's find free node
+
+[bash]
+----
+ocker@node0:~$ docker service ps chat
+ID                  NAME                IMAGE                 NODE                DESIRED STATE       CURRENT STATE                ERROR               PORTS
+92qu0n37nbn5        chat.1              daggerok/chat:0.0.1   node1               Running             Running 6 minutes ago
+0gkgfk46v4xd        chat.2              daggerok/chat:0.0.1   node3               Running             Running about a minute ago
+rf3qg9ygxwup        chat.3              daggerok/chat:0.0.1   node2               Running             Running 48 seconds ago
+w6c6wb83u7p7        chat.4              daggerok/chat:0.0.1   node0               Running             Running about a minute ago
+abue4bj7z19l        chat.5              daggerok/chat:0.0.1   node4               Running             Running about a minute ago
+----
+
+free is node5
+
+to verify that reverse proxy works we just need to tet our chat on that node
+so let's do it, go to http://node5 and verify that chat on that node is also works!
+
+look at hta logs:
+
+user1 (10.0.0.8) says: hi again!
+user1 (10.0.0.7) says: i'm going to re login
+user1 (10.0.0.7) says: hi all!
+
+why? so, while you connecting on node5 (which doesn't have frontend application running),
+you will be randomly proxied to node(0-4). that is why ip addr was changed
+
+==== and last
+
+assume chat became more popular, so, your stomp broker also have to be scaled out...
+as you already know it's very easy :)
+
+[fish,bash]
+----
+docker@node0:~$ docker service scale rabbitmq-stomp=3
+rabbitmq-stomp scaled to 3
+
+# wait...
+docker@node0:~$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE
+0kccls06n04x        chat                replicated          5/5                 daggerok/chat:0.0.1
+n58w7zw2ps52        rabbitmq-stomp      replicated          2/3                 daggerok/rabbitmq-stomp:0.0.1
+
+# wait...
+docker@node0:~$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE
+0kccls06n04x        chat                replicated          5/5                 daggerok/chat:0.0.1
+n58w7zw2ps52        rabbitmq-stomp      replicated          3/3                 daggerok/rabbitmq-stomp:0.0.1
+----
+
+but of course you have to scale out your instances in right way
+all nodes should properly works in the cluster in HA mode...
+
+==== chat and rabbitmq microservices overview
+
+[bash]
+----
+docker@node0:~$ docker service ps chat rabbitmq-stomp
+ID                  NAME                IMAGE                           NODE                DESIRED STATE       CURRENT STATE                ERROR               PORTS
+92qu0n37nbn5        chat.1              daggerok/chat:0.0.1             node1               Running             Running about a minute ago
+gkx5sluc6yrb        rabbitmq-stomp.1    daggerok/rabbitmq-stomp:0.0.1   node5               Running             Running 29 minutes ago
+mph794bp0gvo        rabbitmq-stomp.2    daggerok/rabbitmq-stomp:0.0.1   node4               Running             Running about a minute ago
+0gkgfk46v4xd        chat.2              daggerok/chat:0.0.1             node3               Running             Running 19 minutes ago
+rf3qg9ygxwup        chat.3              daggerok/chat:0.0.1             node2               Running             Running about a minute ago
+ro6ctzq4dveh        rabbitmq-stomp.3    daggerok/rabbitmq-stomp:0.0.1   node0               Running             Running about a minute ago
+w6c6wb83u7p7        chat.4              daggerok/chat:0.0.1             node0               Running             Running about a minute ago
+abue4bj7z19l        chat.5              daggerok/chat:0.0.1             node4               Running             Running about a minute ago
+----
+
+==== quick cleanup (remove) cluster
+
+[fish,bash]
+----
+# fish:
+for i in 0 1 2 3 4 5; docker-machine rm -f "node$i"; end;
+
+# bash:
+for i in 0 1 2 3 4 5; do docker-machine rm -f "node$i"; done;
+----
+
+== docker-compose
+
+[bash]
+----
+gradle clean bootJar
+docker-compose -f src/main/docker/docker-compose.yml up --build -d app
+docker-compose -f src/main/docker/docker-compose.yml scale app=3
+docker-compose -f src/main/docker/docker-compose.yml ps
+----
+
+link:https://github.com/rstoyanchev/spring-websocket-portfolio/blob/master/src/main/java/org/springframework/samples/portfolio/config/WebSecurityConfig.java[TODO: security]
+
+TODO: scale rabbitmq in cluster in HA node properly
+
+TODO: sticky sessions
+
+== links:
+
+- link:https://docker.com/[docker]
+- link:http://jmesnil.net/stomp-websocket/doc/[stomp doc]
+- link:https://habrahabr.ru/post/187822/[stomp ws spring article (ru)]
+- link:https://www.youtube.com/watch?v=mmIza3L64Ic[stomp]
+- link:https://www.youtube.com/watch?v=nxakp15CACY[websockets]
+- link:http://materializecss.com/[materialize.css]

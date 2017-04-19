@@ -18,16 +18,16 @@ plugins {
 
 apply plugin: 'org.springframework.boot'
 
+
 bootJar {
   launchScript {
     included = true
   }
-  mainClass = 'daggerok.SseApplication'
 }
-
 build.dependsOn bootJar
 
 version = '0.0.1'
+group = 'daggerok'
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -37,19 +37,22 @@ repositories {
 }
 
 dependencies {
+  compileOnly 'org.projectlombok:lombok'
   compile 'org.springframework.boot:spring-boot-starter-mustache',
       'org.springframework.boot:spring-boot-starter-websocket',
+      'org.springframework.boot:spring-boot-starter-amqp',
+      'io.projectreactor.ipc:reactor-netty', // 'io.projectreactor.ipc:reactor-netty:0.6.3.BUILD-SNAPSHOT',
+      'io.projectreactor.ipc:reactor-ipc', // 'io.projectreactor.ipc:reactor-ipc:0.6.2.BUILD-SNAPSHOT',
+      'io.projectreactor:reactor-core', // 'io.projectreactor:reactor-core:3.1.0.BUILD-SNAPSHOT',
+      'org.springframework.boot:spring-boot-starter-aop',
       'org.webjars:webjars-locator',
       'org.webjars:sockjs-client:1.1.2',
-      //'org.webjars:sockjs-client:0.3.4',
       'org.webjars:stomp-websocket:2.3.3-1',
       'org.webjars:jquery:3.2.0',
       'org.webjars:materializecss:0.98.1',
       'org.webjars:react:15+',
-      'org.webjars:babel:5.8.29-1',
-      'org.webjars.npm:types__whatwg-fetch:0.0.33', // fetch api
-      'org.webjars.bower:event-source-polyfill:0.0.4' // sse api
-  compileOnly 'org.projectlombok:lombok'
+      'org.webjars:babel:5.8.29-1'
   runtime 'org.springframework.boot:spring-boot-devtools'
+  testCompileOnly 'org.projectlombok:lombok'
   testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
