@@ -1,4 +1,4 @@
-package daggerok.chat;
+package daggerok.chat.resource.stomp;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -23,6 +23,7 @@ public class StompWebSocketMessageBrokerConfig extends AbstractWebSocketMessageB
         .setDisconnectDelay(30000)
         .setHttpMessageCacheSize(2000)
         .setStreamBytesLimit(1024 * 1024)
-        .setClientLibraryUrl("/webjars/sockjs-client/sockjs.min.js");
+        .setClientLibraryUrl("/webjars/sockjs-client/sockjs.min.js")
+    ;
   }
 }

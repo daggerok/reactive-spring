@@ -1,5 +1,6 @@
-package daggerok.chat;
+package daggerok.chat.resource.sse;
 
+import daggerok.chat.resource.model.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -12,6 +13,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.List;
+
+import static java.lang.String.format;
 
 @Slf4j
 @RestController
@@ -30,7 +33,7 @@ public class MessageCommandResource {
         emitter.send(SseEmitter
             .event()
             .name("chat-message-event")
-            .data(message));
+            .data(message.setBody(format("-sse- %s", message.body))));
 
       } catch (IOException e) {
 

@@ -1,0 +1,2 @@
+spring.aop.auto: true
+debug: true

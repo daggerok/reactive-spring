@@ -1,4 +1,4 @@
-package daggerok.chat.test;
+package daggerok;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

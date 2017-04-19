@@ -22,9 +22,7 @@ bootJar {
   launchScript {
     included = true
   }
-  mainClass = 'daggerok.SseApplication'
 }
-
 build.dependsOn bootJar
 
 version = '0.0.1'
@@ -39,9 +37,9 @@ repositories {
 dependencies {
   compile 'org.springframework.boot:spring-boot-starter-mustache',
       'org.springframework.boot:spring-boot-starter-websocket',
+      'org.springframework.boot:spring-boot-starter-aop',
       'org.webjars:webjars-locator',
       'org.webjars:sockjs-client:1.1.2',
-      //'org.webjars:sockjs-client:0.3.4',
       'org.webjars:stomp-websocket:2.3.3-1',
       'org.webjars:jquery:3.2.0',
       'org.webjars:materializecss:0.98.1',
@@ -52,4 +50,5 @@ dependencies {
   compileOnly 'org.projectlombok:lombok'
   runtime 'org.springframework.boot:spring-boot-devtools'
   testCompile 'org.springframework.boot:spring-boot-starter-test'
+  testCompileOnly 'org.projectlombok:lombok'
 }

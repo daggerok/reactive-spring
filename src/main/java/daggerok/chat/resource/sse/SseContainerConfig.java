@@ -1,4 +1,4 @@
-package daggerok.chat;
+package daggerok.chat.resource.sse;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
