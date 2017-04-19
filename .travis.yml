@@ -1,9 +1,10 @@
 sudo: required
+dist: trusty
+install: true
 language: java
 jdk: oraclejdk8
-install: true
 before_install:
-  # gradle
+  # install gradle
   - curl -s "https://get.sdkman.io" | bash
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
   - sdk selfupdate
@@ -14,6 +15,9 @@ before_install:
   - mkdir -p "$HOME/.sdkman/etc"
   - sdk use gradle
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
+  # rabbitmq with stomp
+  - docker build -t rabbitmq-stomp .
+  - docker run -d -p 61613:61613 rabbitmq-stomp
 script: gradle clean build
 cache:
   directories:
