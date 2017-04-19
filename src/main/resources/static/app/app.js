@@ -7,73 +7,100 @@ const {
   element,
 } = React.PropTypes;
 
-/** owner view */
-const Name = ({ setUsername }) => {
-  let inputRef;
-  return <input type="text"
-                onKeyDown={setUsername}
-                onChange={input => inputRef = input}
-                placeholder="please, enter you name"/>;
-};
+/**
+ * Stateful (smart) components
+ */
 
-Name.propTypes = {
-  setUsername: func.isRequired,
-};
-
-/** header view */
-const Header = ({ owner }) => <div>
-  <div className="card-title">
-    <h5 className="blue-grey-text">hello {owner}!</h5>
-  </div>
-</div>;
-
-Header.propTypes = {
-  owner: string.isRequired,
-};
-
-/** rest client helper */
-const onInput = (owner = "anonymous", { keyCode, target }) => {
-  const { value } = target;
-  if (keyCode !== 13 || value.trim().length === 0) return;
-  fetch("/api/v1/command/send-message", {
-    method: "post",
-    headers: { "content-type": "application/json; charset=UTF-8" },
-    body: JSON.stringify({
-      owner,
-      body: value,
-    }),
-  });
-  target.value = "";
-  target.focus();
-};
-
-/** message sender view */
-const MessageSender = ({ owner }) => {
-  let inputRef;
-  return <input type="text"
-                placeholder="enter message"
-                ref={input => inputRef = input}
-                onKeyDown={e => onInput(owner, e)}/>;
-};
-
-MessageSender.propTypes = {
-  owner: string.isRequired,
-};
-
-/** messages list view */
-const Messages = ({ messages }) => <ul>
-  {
-    ! messages
-      ? <li>Loading...</li>
-      : messages.map((message, id) => <li key={id}>{message.owner}: {message.body}</li>)
+/* stomp view begin */
+class StompView extends  React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      connected: false,
+    };
+    this.stompEndpoint = "/stomp-chat-endpoint";
+    this.messagesTopic = "/topic/chat-messages";
+    this.sendMessageDestination = "/app/api/v1/pub-sub/send-message";
+    this.start = this.start.bind(this);
+    this.finish = this.finish.bind(this);
+    this.subscribe = this.subscribe.bind(this);
+    this.sendStompMessage = this.sendStompMessage.bind(this);
   }
-</ul>;
+  subscribe() {
+    this.subscription = this.client.subscribe(
+      this.messagesTopic,
+      this.props.addMessage
+    );
+    this.setState({ connected: true });
+  }
+  start() {
+    const socket = new SockJS(this.stompEndpoint);
+    this.client = Stomp.over(socket);
+    this.client.heartbeat.outgoing = this.client.heartbeat.incoming = 290000;
+    const { clientLogin, clientPasscode } = this.props;
+    this.client.connect(clientLogin, clientPasscode, this.subscribe);
+    this.state.connected = true;
+  }
+  finish () {
+    if (this.subscription) this.subscription.unsubscribe();
+    if (this.client) this.client.disconnect();
+    this.setState({ connected: false });
+  }
+  messageWith(body) {
+    return JSON.stringify({
+      owner: this.props.owner,
+      body,
+    });
+  }
+  sendStompMessage({ keyCode, target}) {
+    const { value } = target;
+    if (13 !== keyCode || !value || !value.trim().length) return;
+    this.client.send(
+      this.sendMessageDestination,
+      this.state.headers,
+      this.messageWith(value)
+    );
+    target.value = "";
+  }
+  componentDidMount() {
+    this.start();
+  }
+  componentWillUnmount() {
+    this.finish();
+  }
+  render() {
+    return (
+      this.state.connected
+        ? <div>
+            <input type="text"
+                   ref={input => this.ref = input}
+                   onKeyDown={this.sendStompMessage}
+                   placeholder="send message to stomp broker"/>
+            <button className="btn"
+                    onClick={this.finish}>finish</button>
+          </div>
+        : <div>
+            <button className="btn"
+                    onClick={this.start}>start</button>
+          </div>
+    );
+  }
+}
 
-Messages.propTypes = {
-  messages: arrayOf(object).isRequired,
+StompView.defaultProps = {
+  clientLogin: "guest",
+  clientPasscode: "guest",
 };
 
-/** main chat application (smart) component */
+StompView.propTypes = {
+  owner: string.isRequired,
+  addMessage: func.isRequired,
+  clientLogin: string.isRequired,
+  clientPasscode: string.isRequired,
+};
+/* stomp view end */
+
+/* main chat application component begin */
 class Chat extends React.Component {
   constructor(props) {
     super(props);
@@ -82,33 +109,16 @@ class Chat extends React.Component {
       edit: props.edit,
       messages: props.messages,
     };
-    this.toggleEdit = this.toggleEdit.bind(this);
     this.setUsername = this.setUsername.bind(this);
+    this.addMessage = this.addMessage.bind(this);
   }
-  connect() {
-    return this.source = new EventSource("/api/v1/query/subscribe/chat-messages");
-  }
-  subscribe() {
-    this.source.addEventListener("chat-message-event", ({ data }) => {
-      const { owner, body } = JSON.parse(data);
-      this.setState({
-        messages: [
-          { owner, body },
-          ...this.state.messages,
-        ],
-      });
-    });
-    this.source.addEventListener("error", e => console.error("sse error", e));
-    this.source.addEventListener("open", e => console.log("subscribed on", e.target.url));
-  }
-  disconnect() {
-    if (this.source) {
-      source.close();
-    }
-  }
-  toggleEdit() {
+  addMessage({ body }) {
+    const message = body;
     this.setState({
-      edit: !this.state.edit,
+      messages: [
+        JSON.parse(message),
+        ...this.state.messages,
+      ],
     });
   }
   setUsername({ keyCode, target }) {
@@ -120,13 +130,6 @@ class Chat extends React.Component {
     });
     target.value = "";
   }
-  componentDidMount() {
-    this.connect();
-    this.subscribe();
-  }
-  componentWillUnmount () {
-    this.disconnect();
-  }
   render() {
     const { edit, owner, messages } = this.state;
     return (
@@ -136,7 +139,8 @@ class Chat extends React.Component {
             ? <Name setUsername={this.setUsername}/>
             : <div>
                 <Header owner={owner}/>
-                <MessageSender owner={owner}/>
+                <StompView owner={owner}
+                           addMessage={this.addMessage}/>
                 <Messages messages={messages}/>
               </div>
         }
@@ -159,8 +163,53 @@ Chat.defaultProps = {
     }
   ],
 };
+/* main chat application component end */
 
-/** Nav (reusable navbar) */
+/**
+ * Stateless functional (dump) components
+ */
+
+/* owner view begin */
+const Name = ({ setUsername }) => {
+  let inputRef;
+  return <input type="text"
+                onKeyDown={setUsername}
+                onChange={input => inputRef = input}
+                placeholder="please, enter you name"/>;
+};
+
+Name.propTypes = {
+  setUsername: func.isRequired,
+};
+/* owner view end */
+
+/* header view begin */
+const Header = ({ owner }) => <div>
+  <div className="card-title">
+    <h5 className="blue-grey-text">hello {owner}!</h5>
+  </div>
+</div>;
+
+Header.propTypes = {
+  owner: string.isRequired,
+};
+/* header view end */
+
+/* messages list view begin */
+const Messages = ({ messages }) => <ul>
+  {
+    ! messages
+      ? <li>Loading...</li>
+      : messages.map((message, id) => <li key={id}>{message.owner} {message.body}</li>)
+  }
+</ul>;
+
+Messages.propTypes = {
+  messages: arrayOf(object).isRequired,
+};
+/* messages list view end */
+
+/* navbar begin */
 const Nav = ({ appName }) => <nav className="light-blue lighten-3">
   <div className="navbar-wrapper container">
     <div className="brand-logo center">{appName}</div>
@@ -172,40 +221,21 @@ Nav.propTypes = {
 };
 
 Nav.defaultProps = {
-  appName: "SSE Chat",
+  appName: "STOMP Chat",
 };
-
-/** Apps (parent container component) */
-const Apps = props => <div>
-  <Nav/>
-  <div>
-    {
-      !props || !props.children
-        ? <div>Loading... (required at least one child)</div>
-        : !props.children.length
-            ? <props.children.type single={true}
-                                   {...props.children.props}
-                                   {...props}>{props.children}</props.children.type>
-            : props.children.map((child, key) =>
-                React.cloneElement(child, {...props, key, single: false}))
-    }
-  </div>
-</div>;
-
-Apps.propTypes = {
-  // // require only single child:
-  // children: element.isRequired,
-  // required 2 or more Components as a children:
-  children: arrayOf(object).isRequired,
-};
-
-/** returns value that is greater than zero */
-const positive = value => !!value && value > 0 ? value : 1;
+/* navbar view end */
 
 /**
- * parse query param from url
- * example: `getParam("q")`
- * returns 3 for http://localhost:3000/?q=3&y=2
+ * helpers
+ */
+
+/* returns value that is greater than zero */
+const positive = value => !!value && value > 0 ? value : 1;
+
+/*
+ parse query param from url
+ example: `getParam("q")`
+ returns 3 for http://localhost:3000/?q=3&y=2
  */
 const getParam = (param = "q", value = 1) => {
   // const url = window.location.href,
@@ -218,18 +248,47 @@ const getParam = (param = "q", value = 1) => {
   return positive(+resultStr);
 };
 
-/**
- *  generate array of elements with size
- *  example: `generateArray(<div>hi!</div>)
+/*
+ generate array of elements with size
+ example: `generateArray(<div>hi!</div>)
  */
 const generateArray = (element = <Chat/>, size = getParam()) =>
   [...new Array(size)].map(_ => element);
+
+/**
+ * bootstrapping
+ */
+
+/* Apps (parent container component) begin */
+const Apps = props => <div>
+  <Nav/>
+  <div>
+    {
+      !props || !props.children
+        ? <div>Loading... (required at least one child)</div>
+        : !props.children.length
+        ? <props.children.type single={true}
+                               {...props.children.props}
+                               {...props}>{props.children}</props.children.type>
+        : props.children.map((child, key) =>
+          React.cloneElement(child, {...props, key, single: false}))
+    }
+  </div>
+</div>;
+
+Apps.propTypes = {
+  // // require only single child:
+  // children: element.isRequired,
+  // required 2 or more Components as a children:
+  children: arrayOf(object).isRequired,
+};
+/** Apps (parent container component) end */
 
 Apps.defaultProps = {
   children: generateArray(),
 };
 
-/** bootstrap app */
+/* render DOM */
 ReactDOM.render(
   <Apps/>,
   document.getElementById("app")

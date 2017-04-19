@@ -1,0 +1,56 @@
+# docker-compose -f src/main/docker/docker-compose.yml up --build -d app
+# fish: open http://(docker-compose -f src/main/docker/docker-compose.yml port app 8080)
+# bash: open "http://$(docker-compose -f src/main/docker/docker-compose.yml port app 8080)"
+# docker-compose -f src/main/docker/docker-compose.yml scale app=3
+# docker-compose -f src/main/docker/docker-compose.yml ps
+version: '2'
+services:
+  app:
+    restart: unless-stopped
+    environment:
+      STOMP_BROKER_RELAY_HOST: broker
+      STOMP_BROKER_RELAY_USER: infrastructureLogin
+      STOMP_BROKER_RELAY_PASS: infrastructurePasscode
+    build:
+      context: ../../..
+      dockerfile: ./src/main/docker/app/Dockerfile
+    ports:
+      ##scale-out is disabled (will thrown an error)
+      #- '80:8080'
+      # scale-out is enabled, but port will be randomly generated (docker ps)
+      - '8080'
+    links:
+      - 'rabbitmq-stomp:broker'
+    depends_on:
+      - rabbitmq-stomp
+    volumes:
+      - app-data:/opt
+    networks:
+      - external
+      - internal
+  rabbitmq-stomp:
+    container_name: rabbitmq-stomp
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: infrastructureLogin
+      RABBITMQ_DEFAULT_PASS: infrastructurePasscode
+    build:
+      context: ../../..
+      dockerfile: ./src/main/docker/rabbitmq-stomp/Dockerfile
+    ports:
+      - '15672:15672'
+      - '61613:61613'
+    volumes:
+      - rabbitmq-stomp-data:/var/lib/rabbitmq
+    networks:
+      - internal
+volumes:
+  app-data:
+    driver: local
+  rabbitmq-stomp-data:
+    driver: local
+networks:
+  external:
+    driver: bridge
+  internal:
+    driver: bridge

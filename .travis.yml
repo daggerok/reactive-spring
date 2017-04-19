@@ -1,9 +1,13 @@
 sudo: required
+dist: trusty
+install: true
 language: java
 jdk: oraclejdk8
-install: true
+env:
+  SPRING_PROFILES_ACTIVE: dev
+  DOCKER_COMPOSE_VERSION: 1.12.0
 before_install:
-  # gradle
+  # install gradle
   - curl -s "https://get.sdkman.io" | bash
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
   - sdk selfupdate
@@ -14,7 +18,25 @@ before_install:
   - mkdir -p "$HOME/.sdkman/etc"
   - sdk use gradle
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
-script: gradle clean build
+  # docker-compose
+  - sudo rm -rf /usr/local/bin/docker-compose
+  - export DOCKER_COPOSE_URL=https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)
+  - curl -L $DOCKER_COPOSE_URL > docker-compose
+  - chmod +x docker-compose
+  - sudo mv -f docker-compose /usr/local/bin
+script:
+  # rabbitmq with stomp
+  - docker-compose -f src/main/docker/docker-compose.yml up --build -d rabbitmq-stomp
+  - gradle clean build
+  - docker-compose -f src/main/docker/docker-compose.yml stop
+  - docker-compose -f src/main/docker/docker-compose.yml build --force-rm --no-cache
+  - docker-compose -f src/main/docker/docker-compose.yml up -d
+  - echo "http://$(docker-compose -f src/main/docker/docker-compose.yml port app 8080)"
+  - docker-compose -f src/main/docker/docker-compose.yml scale app=4
+  - docker-compose -f src/main/docker/docker-compose.yml ps
+after_script:
+  - docker-compose -f src/main/docker/docker-compose.yml down -v
+  - docker-compose -f src/main/docker/docker-compose.yml rm -f -s -v
 cache:
   directories:
     - $HOME/.gradle/

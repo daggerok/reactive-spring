@@ -1,0 +1,49 @@
+= docker-scale-out-distributed-app image:https://travis-ci.org/daggerok/reactive-spring.svg?branch=docker-scale-out-distributed-app["Build Status", link="https://travis-ci.org/daggerok/reactive-spring"]
+
+stack:
+
+- Docker cluster
+- RabbitMQ stomp broker relay (for production applications)
+- STOMP / SockJS chat on spring-boot backend and react frontend
+
+
+== docker-compose scaling out
+
+[souce,bash]
+----
+gradle clean bootJar
+docker-compose -f src/main/docker/docker-compose.yml up --build -d app
+docker-compose -f src/main/docker/docker-compose.yml scale app=3
+docker-compose -f src/main/docker/docker-compose.yml ps
+----
+
+link:https://github.com/rstoyanchev/spring-websocket-portfolio/blob/master/src/main/java/org/springframework/samples/portfolio/config/WebSecurityConfig.java[TODO: security]
+
+link:https://github.com/rstoyanchev/spring-websocket-portfolio/blob/master/src/main/java/org/springframework/samples/portfolio/config/WebSecurityConfig.java[TODO: sticky sessions]
+
+links:
+
+- link:https://docker.com/[docker]
+- link:http://jmesnil.net/stomp-websocket/doc/[stomp doc]
+- link:https://habrahabr.ru/post/187822/[stomp ws spring article (ru)]
+- link:https://www.youtube.com/watch?v=mmIza3L64Ic[stomp]
+- link:https://www.youtube.com/watch?v=nxakp15CACY[websockets]
+- link:http://materializecss.com/[materialize.css]
+
+=== add aop monitor logger: `MessageLogAspect.java`
+
+[souce,java]
+----
+include::src/main/java/daggerok/monitor/MessageLogAspect.java[tags=monitor]
+----
+
+=== add executable (see build.gradle bootJar task)
+
+[souce,bash]
+----
+gradle clean build
+bash build/libs/reactive-router-webflux-0.0.1.jar 
+bash build/libs/reactive-router-webflux-0.0.1.jar --spring.profiles.active=dev 
+----
+
+=== enable STOMP brocker relay (using rabbitmq)

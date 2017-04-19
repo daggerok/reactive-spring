@@ -1,0 +1,10 @@
+stomp:
+  relay:
+    host: ${STOMP_BROKER_RELAY_HOST:127.0.0.1}
+    user: ${STOMP_BROKER_RELAY_USER:guest}
+    pass: ${STOMP_BROKER_RELAY_PASS:guest}
+    heartbeat: 290000
+  endpoint:
+    heartbeat: ${stomp.relay.heartbeat}
+    delay: 30000
+    message-cache-size: 2000
