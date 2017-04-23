@@ -1,4 +1,4 @@
-sudo: required
+group: edge
 dist: trusty
 install: true
 language: java
