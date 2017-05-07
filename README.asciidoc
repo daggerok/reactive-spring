@@ -20,20 +20,12 @@ docker-compose up -d
 docker-compose scale app=2
 ----
 
-find instances ports
-
-[source,bash]
-----
-docker-compose port --index=1 app 3000 # port1
-docker-compose port --index=2 app 3000 # port2
-----
-
 open clients for both and try send messages (clients aren't able to see each other)
 
 [source,bash]
 ----
-open http://localhost:$port1/?wsport=$port1
-open http://localhost:$port2/?wsport=$port2
+open http://$(docker-compose port --index=1 app 3000)
+open http://$(docker-compose port --index=2 app 3000)
 ----
 
 cleanup

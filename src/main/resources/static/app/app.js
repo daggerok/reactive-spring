@@ -50,6 +50,8 @@ const MessageSender = ({ owner, send }) => {
   </div>;
 };
 
+const wsUrl = uri => window.location.href.replace('http', 'ws') + uri;
+
 class Chat extends React.Component {
   constructor(props) {
     super(props);
@@ -85,8 +87,7 @@ class Chat extends React.Component {
       .then(resp => resp.json())
       .then(messages => this.setState({ messages }));
     // WebSocket subscription:
-    const { port } = this.props;
-    this.ws = new WebSocket(`ws://localhost:${port}/api/v1/ws/subscribe/messages`);
+    this.ws = new WebSocket(wsUrl('/api/v1/ws/subscribe/messages'));
     this.ws.onmessage = ({ data }) => {
       const { id, owner, body } = JSON.parse(data);
       this.setState({
@@ -135,7 +136,6 @@ const getNumericParam = (param, value = defaultWsPort) => {
 };
 
 Chat.defaultProps = {
-  port: getNumericParam("wsport"),
   history: 25,
   edit: true,
   messages: [
@@ -151,3 +151,4 @@ ReactDOM.render(
   <Chat/>,
   document.getElementById("app")
 );
+
