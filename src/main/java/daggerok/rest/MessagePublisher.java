@@ -1,8 +1,8 @@
-package daggerok.chat.webflux.pubsub;
+package daggerok.rest;
 
-import daggerok.chat.domain.Message;
-import daggerok.chat.domain.MessageRepository;
-import daggerok.chat.service.MessageEmitter;
+import daggerok.domain.Message;
+import daggerok.domain.MessageRepository;
+import daggerok.pubsub.MessageEmitter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,16 +16,16 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/webflux/publish/message")
-public class WebfluxPublishResource {
+@RequestMapping("/api/v1/publish/message")
+public class MessagePublisher {
 
+  @NonNull final MessageEmitter emitter;
   @NonNull final MessageRepository messageRepository;
-  @NonNull final MessageEmitter messageEmitter;
 
   @PostMapping
   public Mono<Void> postMessage(@Validated @RequestBody(required = false) Message message) {
 
-    messageEmitter.process(message);
+    emitter.emit(message);
     return messageRepository.save(message)
                             .then();
   }

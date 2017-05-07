@@ -1,8 +1,7 @@
-package daggerok.chat.webflux;
+package daggerok.domain;
 
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
-import daggerok.chat.domain.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration;
@@ -10,7 +9,7 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 
 @Slf4j
 @Configuration
-@EnableReactiveMongoRepositories(basePackageClasses = UserRepository.class)
+@EnableReactiveMongoRepositories(basePackageClasses = MessageRepository.class)
 public class ReactiveMongoConfig extends AbstractReactiveMongoConfiguration {
 
   @Override

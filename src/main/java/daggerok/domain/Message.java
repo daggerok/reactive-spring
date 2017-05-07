@@ -1,4 +1,4 @@
-package daggerok.chat.domain;
+package daggerok.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

@@ -6,10 +6,10 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import java.util.Collections;
 
 @SpringBootApplication
-public class SseApplication {
+public class ReactiveWebfluxChatApplication {
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(SseApplication.class)
+    new SpringApplicationBuilder(ReactiveWebfluxChatApplication.class)
         .properties(Collections.singletonMap("server.port", "3000"))
         .run(args);
   }

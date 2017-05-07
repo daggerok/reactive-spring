@@ -1,4 +1,4 @@
-package daggerok.chat.domain;
+package daggerok.domain;
 
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;

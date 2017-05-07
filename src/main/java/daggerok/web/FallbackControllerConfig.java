@@ -1,7 +1,6 @@
 package daggerok.web;
 
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorAttributes;
@@ -14,18 +13,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Configuration
-public class FallbackConfig {
+public class FallbackControllerConfig {
 
   @Bean
   ErrorProperties errorProperties() {
     return new ErrorProperties();
   }
 
-  @Slf4j
   @Controller
-  static class CustomErrorController extends BasicErrorController {
+  static class FallbackController extends BasicErrorController {
 
-    public CustomErrorController(final ErrorAttributes errorAttributes, final ErrorProperties errorProperties) {
+    public FallbackController(final ErrorAttributes errorAttributes, final ErrorProperties errorProperties) {
       super(errorAttributes, errorProperties);
     }
 

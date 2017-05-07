@@ -1,15 +1,12 @@
-= combined-sse-and-webflux-integration image:https://travis-ci.org/daggerok/reactive-spring.svg?branch=combined-sse-and-webflux-integration["Build Status", link="https://travis-ci.org/daggerok/reactive-spring"]
+= sse-using-webflux image:https://travis-ci.org/daggerok/reactive-spring.svg?branch=sse-using-webflux["Build Status", link="https://travis-ci.org/daggerok/reactive-spring"]
 
-links:
-
-* link:https://www.youtube.com/watch?v=Cj4foJzPF80[webflux]
-* link:http://materializecss.com/[materialize.css]
+Server Sent Events chat application using Spring Webflux
 
 start
 
 [source,bash]
 ----
-docker-compose up --remove-orphans
+docker-compose up -d --remove-orphans
 gradle bootRun
 ----
 
@@ -24,20 +21,16 @@ or in console using httpie:
 
 [source,bash]
 ----
-http --stream :3000/api/v1/sse/subscribe/chat
-http --stream :3000/api/v1/webflux/subscribe/chat
-http :3000/api/v1/sse/publish/message owner=sse body=hey
-http :3000/api/v1/webflux/publish/message owner=webflux body=hoi
+http --stream :3000/api/v1/subscribe/messages
+http :3000/api/v1/publish/message owner=sse body=hey
 ----
 
 or in terminal via curl:
 
 [source,bash]
 ----
-curl localhost:3000/api/v1/sse/subscribe/chat
-curl localhost:3000/api/v1/webflux/subscribe/chat
-curl -H'content-type:application/json' localhost:3000/api/v1/sse/publish/message -d'{"owner":"sse","body":"hey"}'
-curl -H'content-type:application/json' localhost:3000/api/v1/webflux/publish/message -d'{"owner":"webflux","body":"hoi"}'
+curl localhost:3000/api/v1/subscribe/messages
+curl -H'content-type:application/json' localhost:3000/api/v1/publish/message -d'{"owner":"webflux","body":"hoi"}'
 ----
 
 stop and cleanup

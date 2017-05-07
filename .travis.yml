@@ -25,10 +25,10 @@ before_install:
   - chmod +x docker-compose
   - sudo mv -f docker-compose /usr/local/bin
 script:
-  # rabbitmq with stomp
   - docker-compose up -d --remove-orphans
   - gradle clean build
 after_script:
+  - gradle --stop
   - docker-compose down -v --remove-orphans
 cache:
   directories:
