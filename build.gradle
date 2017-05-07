@@ -67,6 +67,7 @@ dependencies {
           'org.springframework.boot:spring-boot-starter-data-mongodb',
           'org.mongodb:mongodb-driver-reactivestreams',
           'org.springframework.boot:spring-boot-starter-websocket',
+          'com.fasterxml.jackson.datatype:jackson-datatype-jsr310',
           'org.webjars:webjars-locator',
           'org.webjars:jquery:3.2.0',
           'org.webjars:materializecss:0.98.1',

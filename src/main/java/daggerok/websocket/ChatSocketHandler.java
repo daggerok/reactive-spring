@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
@@ -16,6 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ChatSocketHandler extends TextWebSocketHandler {
 
   private final static CopyOnWriteArrayList<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
@@ -29,6 +31,7 @@ public class ChatSocketHandler extends TextWebSocketHandler {
   }
 
   @Override
+  @Transactional
   protected void handleTextMessage(final WebSocketSession session, final TextMessage message) throws Exception {
 
     val document = from(message);

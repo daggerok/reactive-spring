@@ -1,7 +1,36 @@
+# docker-compose up --build -d app
+# fish: open http://(docker-compose port app 3000)
+# bash: open "http://$(docker-compose port app 3000)"
+# docker-compose scale app=3
+# docker-compose ps
+
 # 1. setup .env file
 # 2. for `docker-compose run` see solution here: https://github.com/docker/compose/issues/4369
 version: '2.1'
 services:
+  # app
+  app:
+    restart: unless-stopped
+    depends_on:
+      mongodb: # healthcheck
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+    build:
+      dockerfile: ./src/main/docker/Dockerfile
+      context: .
+    ports:
+      ##scale-out is disabled (will thrown an error)
+      #- '80:3000'
+      # scale-out is enabled, but port will be randomly generated (docker ps)
+      - '3000'
+    links:
+      - 'mongodb:db'
+    volumes:
+      - app-data:/opt
+    networks:
+      - public
+      - backoffice
   mongodb:
     healthcheck: # healthcheck
       test: 'netstat -tuplen | grep 27017 || exit 1'
@@ -29,10 +58,13 @@ services:
     - backoffice
     - development
 volumes:
+  app-data: {}
   mongodb-data: {}
   mongodb-admin-data: {}
 networks:
   development:
     driver: bridge
   backoffice:
+    driver: bridge
+  public:
     driver: bridge

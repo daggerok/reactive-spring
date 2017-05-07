@@ -25,8 +25,8 @@ before_install:
   - chmod +x docker-compose
   - sudo mv -f docker-compose /usr/local/bin
 script:
-  - docker-compose up -d --remove-orphans
-  - gradle clean build
+  - gradle clean assemble
+  - docker-compose build --force-rm
 after_script:
   - gradle --stop
   - docker-compose down -v --remove-orphans

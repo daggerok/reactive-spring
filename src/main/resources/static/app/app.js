@@ -75,7 +75,18 @@ class Chat extends React.Component {
     target.value = "";
   }
   componentDidMount() {
-    this.ws = new WebSocket("ws://localhost:3000/api/v1/ws/subscribe/messages");
+    // fetch latest messages:
+    const { history } = this.props;
+    const options = {
+      method: "get",
+      headers: { "accept": "application/json" },
+    };
+    fetch(`/api/v1/messages?last=${history}`, options)
+      .then(resp => resp.json())
+      .then(messages => this.setState({ messages }));
+    // WebSocket subscription:
+    const { port } = this.props;
+    this.ws = new WebSocket(`ws://localhost:${port}/api/v1/ws/subscribe/messages`);
     this.ws.onmessage = ({ data }) => {
       const { id, owner, body } = JSON.parse(data);
       this.setState({
@@ -85,9 +96,6 @@ class Chat extends React.Component {
         ],
       });
     };
-    // this.ws.onopen = console.log;
-    // this.ws.onerror = console.log;
-    // this.ws.onclose = console.log;
   }
   componentWillUnmount () {
     if (this.ws && this.ws.close) this.ws.close();
@@ -95,7 +103,7 @@ class Chat extends React.Component {
   render() {
     const { edit, owner, messages } = this.state;
     return (
-      <div className="parallax-container" style={{ padding: '2% 1%' }}>
+      <div className="container" style={{ padding: '2% 1%' }}>
         <Nav/>
         {
           edit
@@ -112,7 +120,23 @@ class Chat extends React.Component {
   }
 }
 
+const defaultWsPort = 3000;
+const positive = value => !!value && value > 0 ? value : defaultWsPort;
+
+const getNumericParam = (param, value = defaultWsPort) => {
+  // const url = window.location.href,
+  const uri = window.location.search,
+    name = param.replace(/[\[\]]/g, "\\$&"),
+    regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
+    results = regex.exec(uri); // = regex.exec(url);
+  if (!results || !results.length || !results[2]) return positive(value);
+  const resultStr = decodeURIComponent(results[2].replace(/\+/g, " "));
+  return positive(+resultStr);
+};
+
 Chat.defaultProps = {
+  port: getNumericParam("wsport"),
+  history: 25,
   edit: true,
   messages: [
     {
