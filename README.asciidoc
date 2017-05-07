@@ -4,15 +4,36 @@ see plain-websocket branch
 here we try scale out using docker to see no possibility communicate
 so next step is using messaging (stomp with rabbitmq or activemq)
 
-start
+build
 
 [source,bash]
 ----
 gradle clean assemble
-docker-compose up -d --remove-orphans
+docker-compose build --force-rm
+----
+
+start and scale uot app up to 2 instances
+
+[source,bash]
+----
+docker-compose up -d
 docker-compose scale app=2
-docker-compose port app 3000
-open http://localhost:$port/?wsport=$port
+----
+
+find instances ports
+
+[source,bash]
+----
+docker-compose port --index=1 app 3000 # port1
+docker-compose port --index=2 app 3000 # port2
+----
+
+open clients for both and try send messages (clients aren't able to see each other)
+
+[source,bash]
+----
+open http://localhost:$port1/?wsport=$port1
+open http://localhost:$port2/?wsport=$port2
 ----
 
 cleanup

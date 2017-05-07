@@ -1,8 +1,9 @@
 # docker-compose up --build -d app
 # fish: open http://(docker-compose port app 3000)
 # bash: open "http://$(docker-compose port app 3000)"
-# docker-compose scale app=3
-# docker-compose ps
+# docker-compose scale app=2
+# docker-compose port --index=1 app 3000 # port1
+# docker-compose port --index=2 app 3000 # port2
 
 # 1. setup .env file
 # 2. for `docker-compose run` see solution here: https://github.com/docker/compose/issues/4369
@@ -10,9 +11,10 @@ version: '2.1'
 services:
   # app
   app:
+    env_file: .env
     restart: unless-stopped
     depends_on:
-      mongodb: # healthcheck
+      mongodb:
         condition: service_healthy
     environment:
       DB_HOST: db
@@ -32,7 +34,8 @@ services:
       - public
       - backoffice
   mongodb:
-    healthcheck: # healthcheck
+    container_name: mongodb
+    healthcheck:
       test: 'netstat -tuplen | grep 27017 || exit 1'
     image: mvertes/alpine-mongo:3.2.10-3
     ports:
@@ -42,8 +45,9 @@ services:
     networks:
     - backoffice
   mongodb-admin:
+    container_name: mongodb-admin
     depends_on:
-      mongodb: # healthcheck
+      mongodb:
         condition: service_healthy
     image: ind3x/rpi-mongo-express:0.32.0-alpine
     ports:
