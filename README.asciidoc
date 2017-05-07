@@ -1,6 +1,6 @@
 = plain-websocket image:https://travis-ci.org/daggerok/reactive-spring.svg?branch=plain-websocket["Build Status", link="https://travis-ci.org/daggerok/reactive-spring"]
 
-Server Sent Events chat application using Spring Webflux
+WebSocket chat application using Spring and Plain WebSockets
 
 start
 
@@ -10,7 +10,7 @@ docker-compose up -d --remove-orphans
 gradle bootRun
 ----
 
-link:http://localhost:3000[test in browser]
+link:http://localhost:3000[test in browser http://localhost:3000]
 
 [source,bash]
 ----
