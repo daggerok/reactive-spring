@@ -1,79 +1,70 @@
-const {
-  func,
-  string,
-  bool,
-  arrayOf,
-  object,
-  element,
-} = React.PropTypes;
+/** Nav (reusable navbar) */
+const Nav = ({ type }) => <nav className="light-blue lighten-3">
+  <div className="navbar-wrapper parallax-container">
+    <div className="brand-logo center">{type} chat</div>
+  </div>
+</nav>;
 
-/** owner view */
+Nav.defaultProps = {
+  appName: "SSE Chat",
+};
+
 const Name = ({ setUsername }) => {
   let inputRef;
-  return <input type="text"
-                onKeyDown={setUsername}
-                onChange={input => inputRef = input}
-                placeholder="please, enter you name"/>;
+  return <div className="input-field">
+    <input type="text"
+           id={Date.now()}
+           onKeyDown={setUsername}
+           onChange={input => inputRef = input}
+           placeholder="please, enter you name"/>
+  </div>;
 };
 
-Name.propTypes = {
-  setUsername: func.isRequired,
-};
-
-/** header view */
 const Header = ({ owner }) => <div>
   <div className="card-title">
     <h5 className="blue-grey-text">hello {owner}!</h5>
   </div>
 </div>;
 
-Header.propTypes = {
-  owner: string.isRequired,
-};
+const post = (url, owner, body) => fetch(url, {
+  method: "post",
+  headers: { "content-type": "application/json; charset=UTF-8" },
+  body: JSON.stringify({ owner, body, }),
+});
 
-/** rest client helper */
 const onInput = (owner = "anonymous", { keyCode, target }) => {
   const { value } = target;
   if (keyCode !== 13 || value.trim().length === 0) return;
-  fetch("/api/v1/command/send-message", {
-    method: "post",
-    headers: { "content-type": "application/json; charset=UTF-8" },
-    body: JSON.stringify({
-      owner,
-      body: value,
-    }),
-  });
+  post("/api/v1/sse/publish/message", owner, value);
   target.value = "";
   target.focus();
 };
 
-/** message sender view */
+const InputContainer = ({ inputRef, owner, onInput }) => <div className="input-field">
+  <input type="text"
+         id={Date.now()}
+         placeholder="enter message"
+         ref={input => inputRef = input}
+         onKeyDown={e => onInput(owner, e)}/>
+</div>;
+
 const MessageSender = ({ owner }) => {
   let inputRef;
-  return <input type="text"
-                placeholder="enter message"
-                ref={input => inputRef = input}
-                onKeyDown={e => onInput(owner, e)}/>;
+  return <InputContainer inputRef={inputRef}
+                         onInput={onInput}
+                         owner={owner}/>
 };
 
-MessageSender.propTypes = {
-  owner: string.isRequired,
-};
-
-/** messages list view */
 const Messages = ({ messages }) => <ul>
   {
     ! messages
       ? <li>Loading...</li>
-      : messages.map((message, id) => <li key={id}>{message.owner}: {message.body}</li>)
+      : messages.map((message, id) => <li key={message.id || id}>{message.owner}: {message.body}</li>)
   }
 </ul>;
 
-Messages.propTypes = {
-  messages: arrayOf(object).isRequired,
-};
+/** sse */
 
-/** main chat application (smart) component */
 class Chat extends React.Component {
   constructor(props) {
     super(props);
@@ -86,7 +77,7 @@ class Chat extends React.Component {
     this.setUsername = this.setUsername.bind(this);
   }
   connect() {
-    return this.source = new EventSource("/api/v1/query/subscribe/chat-messages");
+    return this.source = new EventSource("/api/v1/sse/subscribe/chat");
   }
   subscribe() {
     this.source.addEventListener("chat-message-event", ({ data }) => {
@@ -130,7 +121,8 @@ class Chat extends React.Component {
   render() {
     const { edit, owner, messages } = this.state;
     return (
-      <div className="container">
+      <div className="col s6">
+        <Nav type="SSE"/>
         {
           edit
             ? <Name setUsername={this.setUsername}/>
@@ -145,11 +137,6 @@ class Chat extends React.Component {
   }
 }
 
-Chat.propTypes = {
-  edit: bool.isRequired,
-  messages: arrayOf(object).isRequired,
-};
-
 Chat.defaultProps = {
   edit: true,
   messages: [
@@ -160,77 +147,112 @@ Chat.defaultProps = {
   ],
 };
 
-/** Nav (reusable navbar) */
-const Nav = ({ appName }) => <nav className="light-blue lighten-3">
-  <div className="navbar-wrapper container">
-    <div className="brand-logo center">{appName}</div>
-  </div>
-</nav>;
+/** reactive */
 
-Nav.propTypes = {
-  appName: string,
+const onReactiveInput = (owner = "anonymous", { keyCode, target }) => {
+  const { value } = target;
+  if (keyCode !== 13 || value.trim().length === 0) return;
+  post("/api/v1/webflux/publish/message", owner, value);
+  target.value = "";
+  target.focus();
 };
 
-Nav.defaultProps = {
-  appName: "SSE Chat",
+const ReactiveMessageSender = ({ owner }) => {
+  let inputRef;
+  return <InputContainer inputRef={inputRef}
+                         onInput={onReactiveInput}
+                         owner={owner}/>
 };
 
-/** Apps (parent container component) */
-const Apps = props => <div>
-  <Nav/>
-  <div>
-    {
-      !props || !props.children
-        ? <div>Loading... (required at least one child)</div>
-        : !props.children.length
-            ? <props.children.type single={true}
-                                   {...props.children.props}
-                                   {...props}>{props.children}</props.children.type>
-            : props.children.map((child, key) =>
-                React.cloneElement(child, {...props, key, single: false}))
+class ReactiveChat extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      owner: "",
+      edit: props.edit,
+      messages: props.messages,
+    };
+    this.toggleEdit = this.toggleEdit.bind(this);
+    this.setUsername = this.setUsername.bind(this);
+  }
+  connect() {
+    this.source = new EventSource("/api/v1/webflux/subscribe/chat");
+  }
+  subscribe() {
+    this.source.addEventListener("message", ({ data }) => {
+      const { id, owner, body } = JSON.parse(data);
+      this.setState({
+        messages: [
+          { id, owner, body },
+          ...this.state.messages,
+        ],
+      });
+    });
+    this.source.addEventListener("error", e => console.error("sse error", e));
+    this.source.addEventListener("open", e => console.log("subscribed", e.target.url));
+  }
+  disconnect() {
+    if (this.source) {
+      source.close();
     }
-  </div>
-</div>;
+  }
+  toggleEdit() {
+    this.setState({
+      edit: !this.state.edit,
+    });
+  }
+  setUsername({ keyCode, target }) {
+    const { value } = target;
+    if (keyCode !== 13 || value.trim().length === 0) return;
+    this.setState({
+      edit: false,
+      owner: value,
+    });
+    target.value = "";
+  }
+  componentDidMount() {
+    this.connect();
+    this.subscribe();
+  }
+  componentWillUnmount () {
+    this.disconnect();
+  }
+  render() {
+    const { edit, owner, messages } = this.state;
+    return (
+      <div className="col s6">
+        <Nav type="Webflux"/>
+        {
+          edit
+            ? <Name setUsername={this.setUsername}/>
+            : <div>
+                <Header owner={owner}/>
+                <ReactiveMessageSender owner={owner}/>
+                <Messages messages={messages}/>
+              </div>
+        }
+      </div>
+    );
+  }
+}
 
-Apps.propTypes = {
-  // // require only single child:
-  // children: element.isRequired,
-  // required 2 or more Components as a children:
-  children: arrayOf(object).isRequired,
+ReactiveChat.defaultProps = {
+  edit: true,
+  messages: [
+    {
+      id: "-",
+      owner: "reactive system",
+      body: "We salute you!"
+    }
+  ],
 };
 
-/** returns value that is greater than zero */
-const positive = value => !!value && value > 0 ? value : 1;
-
-/**
- * parse query param from url
- * example: `getParam("q")`
- * returns 3 for http://localhost:3000/?q=3&y=2
- */
-const getParam = (param = "q", value = 1) => {
-  // const url = window.location.href,
-  const uri = window.location.search,
-    name = param.replace(/[\[\]]/g, "\\$&"),
-    regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
-    results = regex.exec(uri); // = regex.exec(url);
-  if (!results || !results.length || !results[2]) return positive(value);
-  const resultStr = decodeURIComponent(results[2].replace(/\+/g, " "));
-  return positive(+resultStr);
-};
-
-/**
- *  generate array of elements with size
- *  example: `generateArray(<div>hi!</div>)
- */
-const generateArray = (element = <Chat/>, size = getParam()) =>
-  [...new Array(size)].map(_ => element);
-
-Apps.defaultProps = {
-  children: generateArray(),
-};
-
-/** bootstrap app */
 ReactDOM.render(
-  <Apps/>,
+  <div className="parallax-container" style={{ padding: '2% 1%' }}>
+    <div className="row">
+      <Chat/>
+      <ReactiveChat/>
+    </div>
+  </div>,
   document.getElementById("app")
 );

@@ -1,33 +1,39 @@
 package daggerok.web;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
+import org.springframework.boot.autoconfigure.web.ErrorProperties;
+import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorAttributes;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 
-import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
-
-@Slf4j
 @Configuration
-public class FallbackConfig implements ErrorViewResolver {
+public class FallbackConfig {
 
-  @Override
-  public ModelAndView resolveErrorView(HttpServletRequest request, HttpStatus status, Map<String, Object> model) {
+  @Bean
+  ErrorProperties errorProperties() {
+    return new ErrorProperties();
+  }
 
-    val formatted = model
-        .entrySet()
-        .stream()
-        .map(e -> format("%s:\"%s\"", e.getKey(), e.getValue()))
-        .collect(joining(","));
+  @Slf4j
+  @Controller
+  static class CustomErrorController extends BasicErrorController {
 
-    log.info("{{}}", formatted);
+    public CustomErrorController(final ErrorAttributes errorAttributes, final ErrorProperties errorProperties) {
+      super(errorAttributes, errorProperties);
+    }
 
-    return new ModelAndView("/index.html");
+    @Override
+    @SneakyThrows
+    public ModelAndView errorHtml(final HttpServletRequest request, final HttpServletResponse response) {
+      response.sendRedirect("/");
+      return null; // useless after redirect
+    }
   }
 }

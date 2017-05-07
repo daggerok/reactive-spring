@@ -1,0 +1,38 @@
+# 1. setup .env file
+# 2. for `docker-compose run` see solution here: https://github.com/docker/compose/issues/4369
+version: '2.1'
+services:
+  mongodb:
+    healthcheck: # healthcheck
+      test: 'netstat -tuplen | grep 27017 || exit 1'
+    image: mvertes/alpine-mongo:3.2.10-3
+    ports:
+    - 27017:27017
+    volumes:
+    - mongodb-data:/data/db
+    networks:
+    - backoffice
+  mongodb-admin:
+    depends_on:
+      mongodb: # healthcheck
+        condition: service_healthy
+    image: ind3x/rpi-mongo-express:0.32.0-alpine
+    ports:
+    - 8081:8081
+    links:
+    - mongodb:mongodb
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    volumes:
+    - mongodb-admin-data:/node_modules
+    networks:
+    - backoffice
+    - development
+volumes:
+  mongodb-data: {}
+  mongodb-admin-data: {}
+networks:
+  development:
+    driver: bridge
+  backoffice:
+    driver: bridge

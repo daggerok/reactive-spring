@@ -2,4 +2,4 @@ spring:
   profiles:
     include: >
       async,
-      mustache
+      exclude

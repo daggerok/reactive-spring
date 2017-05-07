@@ -1,4 +1,4 @@
-/*
+///*
 buildscript {
   repositories {
     mavenCentral()
@@ -14,6 +14,10 @@ plugins {
   id 'java'
   id 'idea'
   id 'eclipse'
+  id 'cn.bestwu.propdeps' version '0.0.10'
+  id 'cn.bestwu.propdeps-idea' version '0.0.10'
+  id 'cn.bestwu.propdeps-maven' version '0.0.10'
+  id 'cn.bestwu.propdeps-eclipse' version '0.0.10'
   id 'io.spring.dependency-management' version '1.0.2.RELEASE'
 }
 
@@ -27,14 +31,20 @@ bootJar {
 }
 
 build.dependsOn bootJar
-*/
+//*/
 
+/*
 plugins {
   id 'java'
   id 'idea'
   id 'eclipse'
+  id 'cn.bestwu.propdeps' version '0.0.10'
+  id 'cn.bestwu.propdeps-idea' version '0.0.10'
+  id 'cn.bestwu.propdeps-maven' version '0.0.10'
+  id 'cn.bestwu.propdeps-eclipse' version '0.0.10'
   id 'io.spring.dependency-management' version '1.0.2.RELEASE'
 }
+*/
 
 dependencyManagement {
   imports {
@@ -52,16 +62,21 @@ repositories {
 }
 
 dependencies {
-  compile 'org.springframework.boot:spring-boot-starter-mustache',
-      'org.springframework.boot:spring-boot-starter-websocket',
-      'org.webjars:webjars-locator',
-      'org.webjars:jquery:3.2.0',
-      'org.webjars:materializecss:0.98.1',
-      'org.webjars:react:15+',
-      'org.webjars:babel:5.8.29-1',
-      'org.webjars.npm:types__whatwg-fetch:0.0.33', // fetch api
-      'org.webjars.bower:event-source-polyfill:0.0.4' // sse api
+  compile 'org.springframework.boot:spring-boot-starter-webflux',
+          'org.springframework.boot:spring-boot-starter-aop',
+          'org.springframework.boot:spring-boot-starter-data-mongodb',
+          'org.mongodb:mongodb-driver-reactivestreams',
+          'org.springframework.boot:spring-boot-starter-web',
+          'org.webjars:webjars-locator',
+          'org.webjars:jquery:3.2.0',
+          'org.webjars:materializecss:0.98.1',
+          'org.webjars:react:15+',
+          'org.webjars:babel:5.8.29-1',
+          'org.webjars.npm:types__whatwg-fetch:0.0.33', // fetch api
+          'org.webjars.bower:event-source-polyfill:0.0.4' // sse api
+  optional 'org.springframework.boot:spring-boot-configuration-processor'
   compileOnly 'org.projectlombok:lombok'
-  runtime 'org.springframework.boot:spring-boot-devtools'
+  runtime 'org.springframework.boot:spring-boot-devtools',
+          'org.springframework.boot:spring-boot-starter-tomcat'
   testCompile 'org.springframework.boot:spring-boot-starter-test'
 }

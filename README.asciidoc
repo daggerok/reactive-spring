@@ -1,0 +1,49 @@
+= combined-sse-and-webflux-integration image:https://travis-ci.org/daggerok/reactive-spring.svg?branch=combined-sse-and-webflux-integration["Build Status", link="https://travis-ci.org/daggerok/reactive-spring"]
+
+links:
+
+* link:https://www.youtube.com/watch?v=Cj4foJzPF80[webflux]
+* link:http://materializecss.com/[materialize.css]
+
+start
+
+[source,bash]
+----
+docker-compose up --remove-orphans
+gradle bootRun
+----
+
+link:http://localhost:3000[test in browser]
+
+[source,bash]
+----
+open http://localhost:3000
+----
+
+or in console using httpie:
+
+[source,bash]
+----
+http --stream :3000/api/v1/sse/subscribe/chat
+http --stream :3000/api/v1/webflux/subscribe/chat
+http :3000/api/v1/sse/publish/message owner=sse body=hey
+http :3000/api/v1/webflux/publish/message owner=webflux body=hoi
+----
+
+or in terminal via curl:
+
+[source,bash]
+----
+curl localhost:3000/api/v1/sse/subscribe/chat
+curl localhost:3000/api/v1/webflux/subscribe/chat
+curl -H'content-type:application/json' localhost:3000/api/v1/sse/publish/message -d'{"owner":"sse","body":"hey"}'
+curl -H'content-type:application/json' localhost:3000/api/v1/webflux/publish/message -d'{"owner":"webflux","body":"hoi"}'
+----
+
+stop and cleanup
+
+[source,bash]
+----
+gradle --stop
+docker-compose down -v --remove-orphans
+----
