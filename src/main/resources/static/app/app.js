@@ -1,12 +1,8 @@
-const Nav = ({ type }) => <nav className="light-blue lighten-3">
+const Nav = () => <nav className="light-blue lighten-3">
   <div className="navbar-wrapper parallax-container">
-    <div className="brand-logo center">{type} chat</div>
+    <div className="brand-logo center">WebSocket Chat</div>
   </div>
 </nav>;
-
-Nav.defaultProps = {
-  type: "Webflux",
-};
 
 const Name = ({ setUsername }) => {
   let inputRef;
@@ -34,33 +30,24 @@ const Messages = ({ messages }) => <ul>
   }
 </ul>;
 
-const post = (url, owner, body) => fetch(url, {
-  method: "post",
-  headers: { "content-type": "application/json; charset=UTF-8" },
-  body: JSON.stringify({ owner, body, }),
-});
-
-const onInput = (owner = "anonymous", { keyCode, target }) => {
+const toMessage = (owner = "anonymous", { keyCode, target }) => {
   const { value } = target;
   if (keyCode !== 13 || value.trim().length === 0) return;
-  post("/api/v1/publish/message", owner, value);
+  const json = JSON.stringify({ owner, body: value.trim(), });
   target.value = "";
   target.focus();
+  return json;
 };
 
-const InputContainer = ({ inputRef, owner, onInput }) => <div className="input-field">
-  <input type="text"
-         id={Date.now()}
-         placeholder="enter message"
-         ref={input => inputRef = input}
-         onKeyDown={e => onInput(owner, e)}/>
-</div>;
-
-const MessageSender = ({ owner }) => {
+const MessageSender = ({ owner, send }) => {
   let inputRef;
-  return <InputContainer inputRef={inputRef}
-                         onInput={onInput}
-                         owner={owner}/>
+  return <div className="input-field">
+    <input type="text"
+           id={Date.now()}
+           placeholder="enter message"
+           ref={input => inputRef = input}
+           onKeyDown={e => send(toMessage(owner, e))}/>
+  </div>;
 };
 
 class Chat extends React.Component {
@@ -71,27 +58,12 @@ class Chat extends React.Component {
       edit: props.edit,
       messages: props.messages,
     };
+    this.send = this.send.bind(this);
     this.toggleEdit = this.toggleEdit.bind(this);
     this.setUsername = this.setUsername.bind(this);
   }
-  connect() {
-    this.source = new EventSource("/api/v1/subscribe/messages");
-  }
-  subscribe() {
-    this.source.addEventListener("message", ({ data }) => {
-      const { id, owner, body } = JSON.parse(data);
-      this.setState({
-        messages: [
-          { id, owner, body },
-          ...this.state.messages,
-        ],
-      });
-    });
-    this.source.addEventListener("error", e => console.error("sse error", e));
-    this.source.addEventListener("open", e => console.log("subscribed", e.target.url));
-  }
-  disconnect() {
-    if (this.source) source.close();
+  send(message) {
+    if (message) this.ws.send(message);
   }
   toggleEdit() {
     this.setState({ edit: !this.state.edit, });
@@ -103,11 +75,22 @@ class Chat extends React.Component {
     target.value = "";
   }
   componentDidMount() {
-    this.connect();
-    this.subscribe();
+    this.ws = new WebSocket("ws://localhost:3000/api/v1/ws/subscribe/messages");
+    this.ws.onmessage = ({ data }) => {
+      const { id, owner, body } = JSON.parse(data);
+      this.setState({
+        messages: [
+          { id , owner, body },
+          ...this.state.messages,
+        ],
+      });
+    };
+    // this.ws.onopen = console.log;
+    // this.ws.onerror = console.log;
+    // this.ws.onclose = console.log;
   }
   componentWillUnmount () {
-    this.disconnect();
+    if (this.ws && this.ws.close) this.ws.close();
   }
   render() {
     const { edit, owner, messages } = this.state;
@@ -119,7 +102,8 @@ class Chat extends React.Component {
             ? <Name setUsername={this.setUsername}/>
             : <div>
                 <Header owner={owner}/>
-                <MessageSender owner={owner}/>
+                <MessageSender owner={owner}
+                               send={this.send}/>
                 <Messages messages={messages}/>
               </div>
         }

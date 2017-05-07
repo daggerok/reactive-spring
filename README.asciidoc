@@ -1,4 +1,4 @@
-= sse-using-webflux image:https://travis-ci.org/daggerok/reactive-spring.svg?branch=sse-using-webflux["Build Status", link="https://travis-ci.org/daggerok/reactive-spring"]
+= plain-websocket image:https://travis-ci.org/daggerok/reactive-spring.svg?branch=plain-websocket["Build Status", link="https://travis-ci.org/daggerok/reactive-spring"]
 
 Server Sent Events chat application using Spring Webflux
 
@@ -15,22 +15,6 @@ link:http://localhost:3000[test in browser]
 [source,bash]
 ----
 open http://localhost:3000
-----
-
-or in console using httpie:
-
-[source,bash]
-----
-http --stream :3000/api/v1/subscribe/messages
-http :3000/api/v1/publish/message owner=sse body=hey
-----
-
-or in terminal via curl:
-
-[source,bash]
-----
-curl localhost:3000/api/v1/subscribe/messages
-curl -H'content-type:application/json' localhost:3000/api/v1/publish/message -d'{"owner":"webflux","body":"hoi"}'
 ----
 
 stop and cleanup
