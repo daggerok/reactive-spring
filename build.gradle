@@ -73,11 +73,9 @@ dependencies {
           'org.webjars:materializecss:0.98.1',
           'org.webjars:react:15+',
           'org.webjars:babel:5.8.29-1',
-          'org.webjars.npm:types__whatwg-fetch:0.0.33', // fetch api
-          'org.webjars.bower:event-source-polyfill:0.0.4' // sse api
+          'org.webjars.npm:types__whatwg-fetch:0.0.33' // fetch api
   optional 'org.springframework.boot:spring-boot-configuration-processor'
   compileOnly 'org.projectlombok:lombok'
-  runtime 'org.springframework.boot:spring-boot-devtools',
-          'org.springframework.boot:spring-boot-starter-tomcat'
+  runtime 'org.springframework.boot:spring-boot-devtools'
   testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
