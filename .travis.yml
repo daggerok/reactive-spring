@@ -32,7 +32,7 @@ script:
   - sleep 5; docker-compose ps
   - docker-compose scale app=3
   - sleep 5; docker-compose ps
-  - for i in 1 2 3; do; echo "$i - http://$(docker-compose port --index=$i app 3000)" done;
+  - for i in 1 2 3; do echo "$i - http://$(docker-compose port --index=$i app 3000)"; done;
 after_script:
   - gradle --stop
   - docker-compose down -v --remove-orphans
