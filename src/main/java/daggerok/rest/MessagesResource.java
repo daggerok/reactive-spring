@@ -2,10 +2,12 @@ package daggerok.rest;
 
 import daggerok.domain.Message;
 import daggerok.domain.MessageRepository;
+import daggerok.rest.events.MessageCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -54,7 +56,7 @@ public class MessagesResource {
                             .take(last);
   }
 
-  @SendTo("/queue/messages.subscribe")
+  @SendTo("/topic/messages.subscribe")
   @SubscribeMapping("/api/v1/messages")
   public CompletableFuture<List<Message>> getLatestMessages(Long last) {
 
@@ -65,7 +67,7 @@ public class MessagesResource {
   }
 
   // coupled but with reactive fashion
-  @SendTo("/queue/message.subscribe")
+  @SendTo("/topic/message.subscribe")
   @MessageMapping("/api/v1/message/publish")
   public CompletableFuture<Message> publisherSubscriber(@RequestBody Message message) {
 
@@ -74,22 +76,22 @@ public class MessagesResource {
                .toFuture();
   }
 
-  /*
-  // here we are receiving... (decoupling 1)
-  @MessageMapping("/api/v1/message/publish")
-  public void publisher(@RequestBody Message message) {
+  /**
+   * only one subscriber will receive that message
+   */
+
+  @MessageMapping("/api/v1/message/winner")
+  public void publishMessageToWinner(@RequestBody Message message) {
 
     applicationEventPublisher.publishEvent(
-        new MessageCreatedEvent(message.setBody(prefix + message.getBody())));
+        new MessageCreatedEvent(message.setBody("got a prize!")));
   }
 
-  // and here processing and sending back (decoupling 2)
   @EventListener
-  public Disposable handleWithSimpleDeclare(MessageCreatedEvent event) {
+  public void handleAndSendWinnerMessage(MessageCreatedEvent event) {
 
-   return messageRepository.save(event.getMessage())
-                           .subscribe(message -> simpMessageSendingOperations
-                               .convertAndSend("/queue/message.subscribe", message));
+    messageRepository.save(event.getMessage())
+                     .subscribe(message -> simpMessageSendingOperations
+                         .convertAndSend("/queue/message.winner", message));
   }
-  */
 }

@@ -79,12 +79,14 @@ class Chat extends React.Component {
 
   subscribe() {
     // latest messages subscription
-    this.subscription =
-      this.stompClient.subscribe("/queue/messages.subscribe", this.addMessages);
+    this.messagesSubscription
+      = this.stompClient.subscribe("/topic/messages.subscribe", this.addMessages);
     this.stompClient.send("/app/api/v1/messages", {}, JSON.stringify(25));
     // new message subscription
-    this.subscription
-      = this.stompClient.subscribe("/queue/message.subscribe", this.addMessage);
+    this.topicSubscription
+      = this.stompClient.subscribe("/topic/message.subscribe", this.addMessage);
+    this.queueSubscription
+      = this.stompClient.subscribe("/queue/message.winner", this.addMessage);
     this.setState({ connected: true });
   }
 
@@ -96,6 +98,7 @@ class Chat extends React.Component {
     const { value } = target;
     if (13 !== keyCode || !value || !value.trim().length) return;
     this.stompClient.send("/app/api/v1/message/publish", {}, this.messageWith(value));
+    this.stompClient.send("/app/api/v1/message/winner", {}, this.messageWith(value));
     target.value = "";
   }
 
@@ -108,7 +111,9 @@ class Chat extends React.Component {
   }
 
   componentWillUnmount() {
-    if (this.subscription && this.subscription.unsubscribe) this.subscription.unsubscribe();
+    if (this.messagesSubscription && this.messagesSubscription.unsubscribe) this.messagesSubscription.unsubscribe();
+    if (this.topicSubscription && this.topicSubscription.unsubscribe) this.topicSubscription.unsubscribe();
+    if (this.queueSubscription && this.queueSubscription.unsubscribe) this.queueSubscription.unsubscribe();
     if (this.client && this.client.disconnect) this.client.disconnect();
     this.setState({ connected: false });
   }

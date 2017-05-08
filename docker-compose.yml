@@ -1,44 +1,43 @@
-# docker-compose up --build -d app
-# fish: open http://(docker-compose port app 3000)
-# bash: open "http://$(docker-compose port app 3000)"
+# docker-compose build --no-cache --force-rm
+# docker-compose up -d app
 # docker-compose scale app=2
-# docker-compose port --index=1 app 3000 # port1
-# docker-compose port --index=2 app 3000 # port2
+# fish: open http://(docker-compose port --index=1 app 3000)
+# bash: open "http://$(docker-compose port --index=2 app 3000)"
 
 # 1. setup .env file
 # 2. for `docker-compose run` see solution here: https://github.com/docker/compose/issues/4369
 version: '2.1'
 services:
-#  # app
-#  app:
-#    env_file: .env
-#    restart: unless-stopped
-#    depends_on:
-#      mongodb:
-#        condition: service_healthy
-#      rabbitmq-stomp:
-#        condition: service_healthy
-#    environment:
-#      DB_HOST: db
-#      STOMP_BROKER_RELAY_HOST: broker
-#    build:
-#      context: .
-#      dockerfile: ./src/main/docker/app/Dockerfile
-#    ports:
-#      ##scale-out is disabled (will thrown an error)
-#      #- '80:3000'
-#      # scale-out is enabled, but port will be randomly generated (docker ps)
-#      - 3000
-#    links:
-#      - 'mongodb:db'
-#      - 'rabbitmq-stomp:broker'
-#    volumes:
-#      - 'app-data:/opt'
-#    networks:
-#      - public
-#      - backoffice
+  app:
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq-stomp:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      STOMP_BROKER_RELAY_HOST: broker
+    build:
+      context: .
+      dockerfile: ./src/main/docker/app/Dockerfile
+    ports:
+      ##scale-out is disabled (will thrown an error)
+      #- '80:3000'
+      # scale-out is enabled, but port will be randomly generated (docker ps)
+      - 3000
+    links:
+      - mongodb:db
+      - rabbitmq-stomp:broker
+    volumes:
+      - app-data:/opt
+    networks:
+      - public
+      - backoffice
   mongodb:
     env_file: .env
+    container_name: mongodb
     image: healthcheck/mongo
     environment:
       MONGO_PORT_27017_TCP_PORT: 27017
@@ -50,6 +49,7 @@ services:
     - backoffice
   mongodb-admin:
     env_file: .env
+    container_name: mongodb-admin
     image: mongo-express:0.38
     environment:
       ME_CONFIG_MONGODB_SERVER: mongodb
@@ -65,6 +65,7 @@ services:
       - development
   rabbitmq-stomp:
     env_file: .env
+    container_name: rabbitmq-stomp
     image: mvertes/alpine-mongo:3.2.10-3
     build:
       context: .

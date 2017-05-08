@@ -27,7 +27,7 @@ bootJar {
   launchScript {
     included = true
   }
-  mainClass = 'daggerok.PlainWebsocketChatApplication'
+  mainClass = 'daggerok.ScalableSockJSStompChatApplication'
 }
 
 build.dependsOn bootJar
