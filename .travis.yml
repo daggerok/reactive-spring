@@ -29,13 +29,10 @@ script:
   - gradle clean build
   - docker-compose build --no-cache --force-rm
   - docker-compose up -d app
-  - sleep 5
-  - docker-compose ps
+  - sleep 5; docker-compose ps
   - docker-compose scale app=3
-  - sleep 5
-  - echo "http://$(docker-compose port --index=1 app 3000)"
-  - echo "http://$(docker-compose port --index=2 app 3000)"
-  - echo "http://$(docker-compose port --index=3 app 3000)"
+  - sleep 5; docker-compose ps
+  - for i in 1 2 3; do; echo "$i - http://$(docker-compose port --index=$i app 3000)" done;
 after_script:
   - gradle --stop
   - docker-compose down -v --remove-orphans
