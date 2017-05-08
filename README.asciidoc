@@ -7,7 +7,7 @@ build
 [source,bash]
 ----
 gradle clean assemble
-docker-compose build --force-rm
+docker-compose build --no-cache --force-rm
 ----
 
 start and scale uot app up to 2 instances
