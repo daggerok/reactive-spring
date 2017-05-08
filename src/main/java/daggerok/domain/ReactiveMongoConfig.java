@@ -1,8 +1,6 @@
 package daggerok.domain;
 
 import com.mongodb.ConnectionString;
-import com.mongodb.async.client.MongoClientSettings;
-import com.mongodb.connection.ServerSettings;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import lombok.extern.slf4j.Slf4j;

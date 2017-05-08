@@ -2,5 +2,6 @@ spring:
   profiles:
     include: >
       db,
+      stomp,
       async,
       exclude

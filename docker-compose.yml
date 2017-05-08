@@ -9,35 +9,39 @@
 # 2. for `docker-compose run` see solution here: https://github.com/docker/compose/issues/4369
 version: '2.1'
 services:
-  # app
-  app:
-    env_file: .env
-    restart: unless-stopped
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    environment:
-      DB_HOST: db
-    build:
-      dockerfile: ./src/main/docker/Dockerfile
-      context: .
-    ports:
-      ##scale-out is disabled (will thrown an error)
-      #- '80:3000'
-      # scale-out is enabled, but port will be randomly generated (docker ps)
-      - '3000'
-    links:
-      - 'mongodb:db'
-    volumes:
-      - app-data:/opt
-    networks:
-      - public
-      - backoffice
+#  # app
+#  app:
+#    env_file: .env
+#    restart: unless-stopped
+#    depends_on:
+#      mongodb:
+#        condition: service_healthy
+#      rabbitmq-stomp:
+#        condition: service_healthy
+#    environment:
+#      DB_HOST: db
+#      STOMP_BROKER_RELAY_HOST: broker
+#    build:
+#      context: .
+#      dockerfile: ./src/main/docker/app/Dockerfile
+#    ports:
+#      ##scale-out is disabled (will thrown an error)
+#      #- '80:3000'
+#      # scale-out is enabled, but port will be randomly generated (docker ps)
+#      - 3000
+#    links:
+#      - 'mongodb:db'
+#      - 'rabbitmq-stomp:broker'
+#    volumes:
+#      - 'app-data:/opt'
+#    networks:
+#      - public
+#      - backoffice
   mongodb:
-    container_name: mongodb
-    healthcheck:
-      test: 'netstat -tuplen | grep 27017 || exit 1'
-    image: mvertes/alpine-mongo:3.2.10-3
+    env_file: .env
+    image: healthcheck/mongo
+    environment:
+      MONGO_PORT_27017_TCP_PORT: 27017
     ports:
     - 27017:27017
     volumes:
@@ -45,26 +49,38 @@ services:
     networks:
     - backoffice
   mongodb-admin:
-    container_name: mongodb-admin
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    image: ind3x/rpi-mongo-express:0.32.0-alpine
+    env_file: .env
+    image: mongo-express:0.38
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
     ports:
     - 8081:8081
     links:
-    - mongodb:mongodb
-    environment:
-      ME_CONFIG_MONGODB_SERVER: mongodb
-    volumes:
-    - mongodb-admin-data:/node_modules
+    - mongodb
+    depends_on:
+      mongodb:
+        condition: service_healthy
     networks:
-    - backoffice
-    - development
+      - backoffice
+      - development
+  rabbitmq-stomp:
+    env_file: .env
+    image: mvertes/alpine-mongo:3.2.10-3
+    build:
+      context: .
+      dockerfile: ./src/main/docker/rabbitmq-stomp/Dockerfile
+    ports:
+      - 15672:15672
+      - 61613:61613
+    volumes:
+      - rabbitmq-stomp-data:/var/lib/rabbitmq
+    networks:
+      - backoffice
+      - development
 volumes:
   app-data: {}
   mongodb-data: {}
-  mongodb-admin-data: {}
+  rabbitmq-stomp-data: {}
 networks:
   development:
     driver: bridge

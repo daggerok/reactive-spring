@@ -1,8 +1,6 @@
-= plain-websocket-test-scaleout-using-docker image:https://travis-ci.org/daggerok/reactive-spring.svg?branch=plain-websocket-test-scaleout-using-docker["Build Status", link="https://travis-ci.org/daggerok/reactive-spring"]
+= stomp-and-sockjs-with-rabbit-for-scale image:https://travis-ci.org/daggerok/reactive-spring.svg?branch=stomp-and-sockjs-with-rabbit-for-scale["Build Status", link="https://travis-ci.org/daggerok/reactive-spring"]
 
-see plain-websocket branch
-here we try scale out using docker to see no possibility communicate
-so next step is using messaging (stomp with rabbitmq or activemq)
+as far scale out with plain WebSocket is almost impossible next step is use sockjs with stomp messaging on top of rabbitmq
 
 build
 
@@ -20,7 +18,7 @@ docker-compose up -d
 docker-compose scale app=2
 ----
 
-open clients for both and try send messages (clients aren't able to see each other)
+open clients for both and try send messages (clients should be able to send chat messages each other)
 
 [source,bash]
 ----
@@ -34,3 +32,9 @@ cleanup
 ----
 docker-compose down -v --remove-orphans
 ----
+
+http://http://docs.spring.io/spring/docs/5.0.0.NEW-DOC/spring-framework-reference/web.html#websocket-stomp[read more]
+https://ordina-jworks.github.io/reactive/2016/12/12/Reactive-Programming-Spring-Reactor.html[read too]
+http://assets.spring.io/wp/WebSocketBlogPost.html[and this]
+https://spring.io/blog/2010/06/14/understanding-amqp-the-protocol-used-by-rabbitmq/[too]
+https://github.com/rstoyanchev/spring-websocket-portfolio[...]
