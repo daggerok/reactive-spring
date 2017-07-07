@@ -19,10 +19,9 @@ plugins {
   id 'cn.bestwu.propdeps-idea' version '0.0.10'
   id 'cn.bestwu.propdeps-maven' version '0.0.10'
   id 'cn.bestwu.propdeps-eclipse' version '0.0.10'
-  id 'io.spring.dependency-management' version '1.0.2.RELEASE'
+  id 'org.springframework.boot' version '1.5.4.RELEASE'
+  id 'io.spring.dependency-management' version '1.0.3.RELEASE'
 }
-
-apply plugin: 'org.springframework.boot'
 
 mainClassName = 'daggerok.Application'
 
@@ -34,20 +33,6 @@ bootJar {
 }
 
 build.dependsOn bootJar
-//*/
-
-/*
-plugins {
-  id 'java'
-  id 'idea'
-  id 'eclipse'
-  id 'cn.bestwu.propdeps' version '0.0.10'
-  id 'cn.bestwu.propdeps-idea' version '0.0.10'
-  id 'cn.bestwu.propdeps-maven' version '0.0.10'
-  id 'cn.bestwu.propdeps-eclipse' version '0.0.10'
-  id 'io.spring.dependency-management' version '1.0.2.RELEASE'
-}
-*/
 
 dependencyManagement {
   imports {
@@ -56,7 +41,7 @@ dependencyManagement {
 }
 
 version = '0.0.1'
-sourceCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
   mavenCentral()
