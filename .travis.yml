@@ -1,4 +1,5 @@
 group: edge
+dist: trusty
 install: true
 language: java
 jdk: oraclejdk8
@@ -9,15 +10,24 @@ before_install:
   - curl -s "https://get.sdkman.io" | bash
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
   - sdk selfupdate
+  - mkdir -p "$HOME/.sdkman/etc"
   - touch "$HOME/.sdkman/etc/config"
   - sed -i -e 's/^sdkman_auto_answer=false$/sdkman_auto_answer=true/g' "$HOME/.sdkman/etc/config"
   - sdk use gradle
-  - sdk install gradle
-  - mkdir -p "$HOME/.sdkman/etc"
-  - sdk use gradle
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
 script:
-  - gradle clean build
+  - gradle clean assemble run
+  - sudo killall -9 java
+  - sleep 5
+
+  - gradle run
+  - sudo killall -9 java
+  - sleep 5
+
+  - java -jar build/libs/*.jar
+  - sleep 5
+
+  - bash build/libs/*.jar
 after_script:
   - gradle --stop
 cache:

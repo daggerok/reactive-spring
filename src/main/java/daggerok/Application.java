@@ -24,7 +24,7 @@ public class Application {
     new Thread(() -> RoutesApplication.main(new String[]{"3000", timeout})).start();
     new Thread(() -> SpringBeansApplication.main(new String[]{"8888"})).start();
     new Thread(() -> ReactiveWebfluxServiceApplication.main(new String[]{"8080"})).start();
-    new Thread(() -> WebClientApplication.main(new String[]{"3000"})).start();
+    new Thread(() -> WebClientApplication.main(new String[]{"8000"})).start();
 
     log.info("application will shutdown in {} seconds...", timeout);
     Thread.currentThread().join();
