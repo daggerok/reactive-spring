@@ -1,9 +1,13 @@
+**/ext/
+!**/.gitkeep
+
 ### IntelliJ IDEA ###
 .idea/
 !.idea/runConfigurations/*
 .gradle/
 build/
-gradle*
+gradle/
+gradlew*
 *.iws
 *.iml
 *.ipr

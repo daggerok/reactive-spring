@@ -1,0 +1,18 @@
+version: "2.1"
+services:
+  spring-boot-app:
+    image: openjdk:8u131-jre-alpine
+    ports: ["8080:8080"]
+    networks: [spring-boot-app-network]
+    volumes:
+      - "spring-boot-app-data-volume:/var/spring-boot"
+      - "../../build/libs/reactive-spring-0.0.1.jar:/var/spring-boot/app.jar"
+    environment:
+      JAVA_OPTS: "-Djava.security.egd=file:/dev/./urandom"
+    #command: sh -c "mkdir -f /var/spring-boot # not needed with docker-compose"
+    entrypoint: sh -c "java $JAVA_OPTS -jar /var/spring-boot/app.jar"
+volumes:
+  spring-boot-app-data-volume: {}
+networks:
+  spring-boot-app-network:
+    driver: bridge

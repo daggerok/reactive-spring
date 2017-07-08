@@ -1,0 +1,49 @@
+buildscript {
+  repositories {
+    jcenter()
+    maven { url 'https://plugins.gradle.org/m2/' }
+    maven { url 'http://smartbearsoftware.com/repository/maven2/' }
+  }
+  dependencies { classpath 'gradle.plugin.org.urbanbyte:soapui-gradle-plugin:0.4.3' }
+}
+
+plugins {
+  id 'org.urbanbyte.soapui' version '0.4.3'
+  id 'com.avast.gradle.docker-compose' version '0.4.3'
+}
+
+// fix windows paths... replace all: '\\' -> '/'
+def soapUiRoot = projectDir.absolutePath.replaceAll('\\\\', '/')
+def src = "$soapUiRoot/src"
+
+dockerCompose {
+  useComposeFiles = ["$src/docker-compose.yml"]
+  captureContainersOutput = true
+  stopContainers = true
+  removeContainers = true
+  removeImages = "Local"
+  removeVolumes = true
+  removeOrphans = true
+  projectName = "$project.name"
+}
+
+soapui {
+  test {
+    projectFile = "$src/soapui-test-project.xml"
+    outputFolder = buildDir
+    printReport = true
+    junitReport = true
+    testSuite = [
+        "TestSuite",
+    ]
+    projectProperties = [
+        "apiEndpoint=$apiEndpoint",
+    ]
+  }
+}
+
+soaptest {
+  dependsOn ":assemble", composeUp
+  shouldRunAfter ":clean", ":assemble", composeUp
+  finalizedBy composeDown
+}

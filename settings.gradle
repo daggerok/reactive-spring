@@ -1,0 +1,15 @@
+rootProject.name = 'reactive-spring'
+include 'soapui'
+
+/*
+def subModulesRoot = 'soapui'
+def ignore = file('.gitignore').readLines() + ['env', 'ext']
+def soapUiProjects = file(subModulesRoot)
+    .listFiles()
+    .findAll({ it.isDirectory() })
+    .findAll({ !ignore.contains(it.name) })
+
+soapUiProjects.each { File soapUiProjectDir ->
+  include "$subModulesRoot:$soapUiProjectDir.name"
+}
+*/

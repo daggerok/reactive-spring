@@ -1,12 +1,17 @@
-///*
 buildscript {
+  ext {
+    springBootVersion = '2.0.0.BUILD-SNAPSHOT'
+
+    propertiesPluginEnvironmentNameProperty = 'env'
+    environmentFileDir = 'env'
+  }
   repositories {
     mavenCentral()
     maven { url 'https://repo.spring.io/snapshot' }
     maven { url 'https://repo.spring.io/milestone' }
   }
   dependencies {
-    classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.0.0.BUILD-SNAPSHOT'
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
   }
 }
 
@@ -21,7 +26,12 @@ plugins {
   id 'cn.bestwu.propdeps-eclipse' version '0.0.10'
   id 'org.springframework.boot' version '1.5.4.RELEASE'
   id 'io.spring.dependency-management' version '1.0.3.RELEASE'
+  id 'net.saliman.properties' version '1.4.6'
 }
+
+group 'daggerok'
+version '0.0.1'
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 
 mainClassName = 'daggerok.Application'
 
@@ -34,14 +44,29 @@ bootJar {
 
 build.dependsOn bootJar
 
-dependencyManagement {
-  imports {
-    mavenBom 'org.springframework.boot:spring-boot-dependencies:2.0.0.BUILD-SNAPSHOT'
+// `gradle dev bootRun`: The following profiles are active: dev
+['dev'].each { taskName ->
+  tasks.create(taskName) {
+    bootRun {
+      systemProperty 'spring.profiles.active', taskName
+    }
   }
 }
 
-version = '0.0.1'
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+// `gradle build bootRun`: The following profiles are active: test
+[test].each {
+  it.doFirst {
+    bootRun {
+      systemProperty 'spring.profiles.active', 'test'
+    }
+  }
+}
+
+dependencyManagement {
+  imports {
+    mavenBom "org.springframework.boot:spring-boot-dependencies:$springBootVersion"
+  }
+}
 
 repositories {
   mavenCentral()
@@ -54,5 +79,6 @@ dependencies {
   compile 'org.springframework.boot:spring-boot-starter-webflux'
   optional 'org.springframework.boot:spring-boot-configuration-processor'
   runtime 'org.springframework.boot:spring-boot-devtools'
+  testCompileOnly 'org.projectlombok:lombok'
   testCompile 'org.springframework.boot:spring-boot-starter-test'
 }

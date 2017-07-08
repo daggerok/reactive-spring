@@ -1,26 +1,35 @@
 group: edge
+dist: trusty
 install: true
 language: java
 jdk: oraclejdk8
 env:
   SPRING_PROFILES_ACTIVE: dev
 before_install:
-  # gradle
+  - sudo rm -rf $HOME/.m2 $HOME/.gradle .gradle gradle build
   - curl -s "https://get.sdkman.io" | bash
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
   - sdk selfupdate
   - touch "$HOME/.sdkman/etc/config"
   - sed -i -e 's/^sdkman_auto_answer=false$/sdkman_auto_answer=true/g' "$HOME/.sdkman/etc/config"
+  - sdk use java 8u131-zulu
   - sdk use gradle
-  - sdk install gradle
   - mkdir -p "$HOME/.sdkman/etc"
-  - sdk use gradle
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
 script:
-  - gradle clean build
+  - gradle clean assemble
+  - sudo mkdir -p /var/spring-boot
+  - sudo mv -f build/libs/*.jar /var/spring-boot/app.jar
+  - sudo ln -s /var/spring-boot/app.jar /etc/init.d/spring-boot-app
+  - sudo service spring-boot-app start
+  - sleep 15
+  - curl -sS localhost:8080 | jq
+  - sudo service spring-boot-app stop
+  - gradle soaptest
 after_script:
   - gradle --stop
 cache:
   directories:
     - $HOME/.gradle/
     - .gradle/
+    - gradle
