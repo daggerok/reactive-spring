@@ -17,11 +17,11 @@ before_install:
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
 script:
   - gradle clean assemble run
-  - sudo killall -9 java
+  - sudo killall -9 java | true
   - sleep 5
 
   - gradle run
-  - sudo killall -9 java
+  - sudo killall -9 java | true
   - sleep 5
 
   - java -jar build/libs/*.jar
