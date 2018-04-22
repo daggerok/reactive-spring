@@ -28,7 +28,3 @@ script:
   - bash build/libs/*.jar
 after_script:
   - gradle --stop
-cache:
-  directories:
-    - $HOME/.gradle/
-    - .gradle/
