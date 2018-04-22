@@ -1,7 +1,6 @@
 package daggerok.reactive.service.resource;
 
 import daggerok.payload.Event;
-import lombok.val;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,8 +30,8 @@ public class StreamingResource {
   @GetMapping(produces = TEXT_EVENT_STREAM_VALUE)
   public Flux<Event> events() {
 
-    val curr = Flux.fromStream(Stream.generate(() -> Event.of("" + System.currentTimeMillis())));
-    val each = Flux.interval(Duration.ofMillis(2500));
+    final Flux<Event> curr = Flux.fromStream(Stream.generate(() -> Event.of("" + System.currentTimeMillis())));
+    final Flux<Long> each = Flux.interval(Duration.ofMillis(2500));
 
     return Flux.zip(curr, each)
                .map(Tuple2::getT1)

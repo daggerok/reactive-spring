@@ -6,13 +6,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Collections;
 import java.util.function.Consumer;
 
 import static java.util.Objects.nonNull;
+import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
 @Slf4j
 @SpringBootApplication
@@ -20,7 +20,7 @@ public class WebClientApplication {
 
   @Bean
   WebClient webClient() {
-    return WebClient.create("http://localhost:8080");
+    return WebClient.create("http://0.0.0.0:8080");
   }
 
   @Bean
@@ -34,16 +34,16 @@ public class WebClientApplication {
     return args -> webClient()
         .get()
         .uri("/")
-        .accept(MediaType.TEXT_EVENT_STREAM)
+        .accept(TEXT_EVENT_STREAM)
         .exchange()
         .flatMapMany(clientResponse -> clientResponse.bodyToFlux(Event.class))
         .map(Event::getPayload)
-        .subscribe(log::info);
+        .subscribe(s -> log.info("{}", s));
   }
 
   public static void main(String[] args) {
 
-    String port = nonNull(args) && args.length > 0 ? args[0] : "3000";
+    final String port = nonNull(args) && args.length > 0 ? args[0] : "3000";
 
     new SpringApplicationBuilder(WebClientApplication.class)
         .properties(Collections.singletonMap("server.port", port))

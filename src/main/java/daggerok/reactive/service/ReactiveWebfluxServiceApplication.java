@@ -12,7 +12,7 @@ public class ReactiveWebfluxServiceApplication {
 
   public static void main(String[] args) {
 
-    String port = nonNull(args) && args.length > 0 ? args[0] : "8080";
+    final String port = nonNull(args) && args.length > 0 ? args[0] : "8080";
     // SpringApplication.run(ReactiveWebfluxServiceApplication.class, args);
     new SpringApplicationBuilder(ReactiveWebfluxServiceApplication.class)
         .properties(Collections.singletonMap("server.port", port))

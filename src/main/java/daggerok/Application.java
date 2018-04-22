@@ -6,7 +6,6 @@ import daggerok.reactive.client.WebClientApplication;
 import daggerok.reactive.service.ReactiveWebfluxServiceApplication;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import static java.util.Objects.nonNull;
@@ -18,8 +17,8 @@ public class Application {
   @SneakyThrows
   public static void main(String[] args) {
 
-    val arg = nonNull(args) && args.length > 0 ? args[0].split("=") : new String[] { "args", "5" };
-    val timeout = arg[1];
+    final String[] arg = nonNull(args) && args.length > 0 ? args[0].split("=") : new String[]{"args", "5"};
+    final String timeout = arg[1];
 
     new Thread(() -> RoutesApplication.main(new String[]{"3000", timeout})).start();
     new Thread(() -> SpringBeansApplication.main(new String[]{"8888"})).start();
