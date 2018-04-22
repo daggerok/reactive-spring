@@ -43,3 +43,8 @@ http --stream :8888/blabla
 curl http://localhost:8080/1 | pj
 curl http://localhost:8080/
 ```
+
+others:
+
+- link:https://github.com/daggerok/sockjs-stomp-websocket-react-and-vanilla[sockjs | stomp | websocket | react]
+
