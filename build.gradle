@@ -22,7 +22,7 @@ plugins {
   id 'cn.bestwu.propdeps-maven' version '0.0.10'
   id 'cn.bestwu.propdeps-eclipse' version '0.0.10'
   id 'org.springframework.boot' version '1.5.4.RELEASE'
-  id 'io.spring.dependency-management' version '1.0.3.RELEASE'
+  id 'io.spring.dependency-management' version '1.0.5.RELEASE'
 }
 
 group 'daggerok'
