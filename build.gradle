@@ -1,6 +1,6 @@
 buildscript {
   ext {
-    springBootVersion = '2.0.0.BUILD-SNAPSHOT'
+    springBootVersion = '2.0.1'
   }
   repositories {
     mavenCentral()
@@ -32,9 +32,7 @@ sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 mainClassName = 'daggerok.Application'
 
 bootJar {
-  launchScript {
-    included = true
-  }
+  launchScript()
   mainClass = "$mainClassName"
 }
 
