@@ -1,6 +1,8 @@
 reactive-spring [![build](https://travis-ci.org/daggerok/reactive-spring.svg?branch=master)](https://travis-ci.org/daggerok/reactive-spring)
 ===============
 
+NOTE: Latest build is failing... Nedds to be fixed... Some how.
+
 ## see branches!
 
 ```bash
