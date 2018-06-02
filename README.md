@@ -48,5 +48,5 @@ curl http://localhost:8080/
 
 others:
 
-- link:https://github.com/daggerok/sockjs-stomp-websocket-react-and-vanilla[sockjs | stomp | websocket | react]
+- [sockjs | stomp | websocket | react](https://github.com/daggerok/sockjs-stomp-websocket-react-and-vanilla)
 
