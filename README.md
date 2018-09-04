@@ -1,52 +1,42 @@
-reactive-spring [![build](https://travis-ci.org/daggerok/reactive-spring.svg?branch=master)](https://travis-ci.org/daggerok/reactive-spring)
-===============
+# spring-webflux  [![build](https://travis-ci.org/daggerok/reactive-spring.svg?branch=master)](https://travis-ci.org/daggerok/reactive-spring)
+modern reactive and non-blocking java web apps
 
-NOTE: Latest build is failing... Nedds to be fixed... Some how.
+```java
+@Component
+class ApplicationHandlers {
 
-## see branches!
+  /** Functional rendering thymeleaf template */
+  Mono<RenderingResponse> index(final ServerRequest request) {
+    return create("index").modelAttribute("message", "Hello, World!")
+                          .build()
+        ;
+  }
 
-```bash
-gradle bootRun
+/*// same index rendering...
+  Mono<ServerResponse> index(final ServerRequest request) {
+    return ok().contentType(TEXT_HTML)
+               .render("index", singletonMap("message", "Hello, World!"))
+        ;
+  }
+*/
 
-# or customize timeout (default is 5 seconds)
-gradle clean build
-bash build/libs/*.jar -Dargs=300
-java -jar build/libs/*.jar -Dargs=30
-porrts are allocated:
-5
-# cleanup
-export listen="$(netstat -AaLlnW|grep -E '3000|8000|8080|8888|9999' | wc -l)"
-if [ "$listen" -ne "0" ]; then echo "seems like java is allocating $listen ports"; fi;
+  /** Functional webflux REST API endpoint */
+  Mono<ServerResponse> api(final ServerRequest request) {
+    return ok().contentType(APPLICATION_JSON_UTF8)
+               .body(Mono.just("Hello World!"), String.class)
+        ;
+  }
+}
 
-killall -9 java
+@Configuration
+@EnableWebFlux
+public class Application {
+
+  @Bean
+  RouterFunction routes(final ApplicationHandlers handlers) {
+    return route(GET("/api/**").and(accept(APPLICATION_JSON_UTF8)), handlers::api)
+        .andOther(route(GET("/").and(accept(TEXT_HTML)), handlers::index))
+        ;
+  }
+}
 ```
-
-links:
-- [project page](http://projects.spring.io/spring-framework/)
-- [webflux sse](https://spring.io/blog/2017/03/08/spring-tips-server-sent-events-sse)
-- [spring 5 functional web framework](https://spring.io/blog/2016/09/22/new-in-spring-5-functional-web-framework)
-- [spring 5.0 M5](https://spring.io/blog/2017/02/23/spring-framework-5-0-m5-update)
-using
-- Spring 5 functional light reactive handlers
-- Mono
-- Flux
-
-```bash
-gradle bootRun
-http :8080/1
-http --stream :8080
-http :8888/123
-http --stream :8888
-http --stream :8888/blabla
-```
-
-```bash
-# using curl
-curl http://localhost:8080/1 | pj
-curl http://localhost:8080/
-```
-
-others:
-
-- [sockjs | stomp | websocket | react](https://github.com/daggerok/sockjs-stomp-websocket-react-and-vanilla)
-

@@ -3,7 +3,7 @@
 !.idea/runConfigurations/*
 .gradle/
 build/
-gradle*
+out/
 *.iws
 *.iml
 *.ipr

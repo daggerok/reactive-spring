@@ -1,31 +1,63 @@
 package daggerok;
 
-import daggerok.functional.bean.SpringBeansApplication;
-import daggerok.functional.vanilla.RoutesApplication;
-import daggerok.reactive.client.WebClientApplication;
-import daggerok.reactive.service.ReactiveWebfluxServiceApplication;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.server.RenderingResponse;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Mono;
 
-import static java.util.Objects.nonNull;
+import java.util.Collections;
+
+import static java.util.Collections.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.http.MediaType.TEXT_HTML;
+import static org.springframework.web.reactive.function.server.RenderingResponse.create;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.ServerResponse.ok;
+
+@Component
+class ApplicationHandlers {
+
+/*
+  Mono<ServerResponse> index(final ServerRequest request) {
+    return ok().contentType(TEXT_HTML)
+               .render("index", singletonMap("message", "Hello, World!"))
+        ;
+  }
+*/
+
+  Mono<RenderingResponse> index(final ServerRequest request) {
+    return create("index").modelAttribute("message", "Hello, World!")
+                          .build()
+        ;
+  }
+
+  Mono<ServerResponse> api(final ServerRequest request) {
+    return ok().contentType(APPLICATION_JSON_UTF8)
+               .body(Mono.just("Hello World!"), String.class)
+        ;
+  }
+}
 
 @Slf4j
 @SpringBootApplication
 public class Application {
 
-  @SneakyThrows
+  @Bean
+  RouterFunction routes(final ApplicationHandlers handlers) {
+    return route(GET("/api/**").and(accept(APPLICATION_JSON_UTF8)), handlers::api)
+        .andOther(route(GET("/").and(accept(TEXT_HTML)), handlers::index))
+        ;
+  }
+
   public static void main(String[] args) {
-
-    final String[] arg = nonNull(args) && args.length > 0 ? args[0].split("=") : new String[]{"args", "5"};
-    final String timeout = arg[1];
-
-    new Thread(() -> RoutesApplication.main(new String[]{"3000", timeout})).start();
-    new Thread(() -> SpringBeansApplication.main(new String[]{"8888"})).start();
-    new Thread(() -> ReactiveWebfluxServiceApplication.main(new String[]{"8080"})).start();
-    new Thread(() -> WebClientApplication.main(new String[]{"8000"})).start();
-
-    log.info("application will shutdown in {} seconds...", timeout);
-    Thread.currentThread().join();
+    SpringApplication.run(Application.class, args);
   }
 }

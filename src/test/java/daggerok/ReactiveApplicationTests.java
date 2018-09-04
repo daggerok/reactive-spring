@@ -1,24 +1,16 @@
 package daggerok;
 
-import daggerok.reactive.client.WebClientApplication;
-import daggerok.functional.bean.SpringBeansApplication;
-import daggerok.functional.vanilla.RoutesApplication;
-import daggerok.reactive.service.ReactiveWebfluxServiceApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = {
-        Application.class,
-        ReactiveWebfluxServiceApplication.class,
-        WebClientApplication.class,
-        RoutesApplication.class,
-        SpringBeansApplication.class,
-    })
+    webEnvironment = RANDOM_PORT,
+    classes = { Application.class, })
 public class ReactiveApplicationTests {
 
   @Test
