@@ -2,24 +2,25 @@ services:
 - docker
 
 language: java
-jdk: oraclejdk8
+jdk: openjdk8
+python: 3
 
 env:
   SPRING_PROFILES_ACTIVE: dev
 
-install: true
+addons:
+  apt:
+    packages:
+    - jq
+    - bash
+    - curl
+    - sudo
+    - lsof
+    - unzip
+    - docker-ce
+    - python-pip
+
 before_install:
-# gradle
-- curl -s "https://get.sdkman.io" | bash
-- source "$HOME/.sdkman/bin/sdkman-init.sh"
-- sdk selfupdate
-- mkdir -p "$HOME/.sdkman/etc"
-- touch "$HOME/.sdkman/etc/config"
-- sed -i -e 's/^sdkman_auto_answer=false$/sdkman_auto_answer=true/g' "$HOME/.sdkman/etc/config"
-- sdk use gradle
-- source "$HOME/.sdkman/bin/sdkman-init.sh"
-- sudo apt -y update || true >/dev/null 2>&1
-- sudo apt install -y --no-install-recommends bash curl docker-ce python-pip >/dev/null 2>&1
 - sudo pip install httpie docker-compose >/dev/null 2>&1
 - source <(curl -s https://raw.githubusercontent.com/daggerok/bash-functions/master/main.bash)
 - stop_any 5432 5672 27017 8080 80
